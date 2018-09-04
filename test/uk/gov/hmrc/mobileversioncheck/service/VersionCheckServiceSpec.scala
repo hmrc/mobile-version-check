@@ -17,8 +17,6 @@
 package uk.gov.hmrc.mobileversioncheck.service
 
 import org.scalamock.scalatest.MockFactory
-import play.api.libs.json.JsValue
-import play.api.libs.json.Json.toJson
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.connector.CustomerProfileConnector
 import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
@@ -32,39 +30,39 @@ class VersionCheckServiceSpec extends UnitSpec with MockFactory {
   val connector: CustomerProfileConnector = mock[CustomerProfileConnector]
   val service = new VersionCheckService(connector)
 
-  val versionInformation: JsValue = toJson(DeviceVersion(iOS, "0.1"))
+  val deviceVersion = DeviceVersion(iOS, "0.1")
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
   val existingJourneyId = "existingJourneyId"
 
   def mockConnectorVersionCheck(upgrade: Boolean) =
-    (connector.versionCheck(_: JsValue, _: HeaderCarrier)(_: ExecutionContext)).expects(versionInformation, *, *).returning(Future successful upgrade)
+    (connector.versionCheck(_: DeviceVersion, _: HeaderCarrier)(_: ExecutionContext)).expects(deviceVersion, *, *).returning(Future successful upgrade)
 
   "version check" should {
     "return upgradeRequired true when a journey id is supplied" in {
       mockConnectorVersionCheck(upgrade = false)
-      val result = await(service.versionCheck(versionInformation, Some(existingJourneyId)))
+      val result = await(service.versionCheck(deviceVersion, Some(existingJourneyId)))
 
       result.upgradeRequired shouldBe false
     }
 
     "return upgradeRequired false when a journey id is supplied" in {
       mockConnectorVersionCheck(upgrade = true)
-      val result = await(service.versionCheck(versionInformation, Some(existingJourneyId)))
+      val result = await(service.versionCheck(deviceVersion, Some(existingJourneyId)))
 
       result.upgradeRequired shouldBe true
     }
 
     "return upgradeRequired true when no journey id is supplied" in {
       mockConnectorVersionCheck(upgrade = false)
-      val result = await(service.versionCheck(versionInformation, None))
+      val result = await(service.versionCheck(deviceVersion, None))
 
       result.upgradeRequired shouldBe false
     }
 
     "return upgradeRequired false when no journey id is supplied" in {
       mockConnectorVersionCheck(upgrade = true)
-      val result = await(service.versionCheck(versionInformation, None))
+      val result = await(service.versionCheck(deviceVersion, None))
 
       result.upgradeRequired shouldBe true
     }

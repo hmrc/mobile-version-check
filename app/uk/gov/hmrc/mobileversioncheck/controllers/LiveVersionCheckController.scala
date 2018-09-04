@@ -18,21 +18,32 @@ package uk.gov.hmrc.mobileversioncheck.controllers
 
 import com.google.inject.Singleton
 import javax.inject.Inject
-import play.api.libs.json.JsValue
-import play.api.libs.json.Json.toJson
+import play.api.Logger
+import play.api.libs.json.{JsError, JsValue}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, BodyParsers}
+import uk.gov.hmrc.api.controllers.HeaderValidator
+import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
 import uk.gov.hmrc.mobileversioncheck.service.VersionCheckService
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
-class LiveVersionCheckController @Inject()(val service: VersionCheckService) extends BaseController {
-  def versionCheck(journeyId: Option[String] = None): Action[JsValue] = Action.async(BodyParsers.parse.json) {
-    implicit request => {
-      service.versionCheck(request.body, journeyId).map {
-        response => Ok(toJson(response))
-      }
+class LiveVersionCheckController @Inject()(val service: VersionCheckService) extends BaseController with HeaderValidator{
+  def versionCheck(journeyId: Option[String] = None): Action[JsValue] = validateAccept(acceptHeaderValidationRules).async(BodyParsers.parse.json) {
+    implicit request =>
+      request.body.validate[DeviceVersion].fold(
+        errors => {
+          Logger.warn("Received error with service validate app version: " + errors)
+          Future.successful(BadRequest(JsError.toJson(errors)))
+        },
+        deviceVersion => {
+          service.versionCheck(deviceVersion, journeyId).map {
+            response => Ok(Json.toJson(response))
+          }
+        }
+      )
     }
-  }
 }

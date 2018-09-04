@@ -19,14 +19,16 @@ package uk.gov.hmrc.mobileversioncheck.connector
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Singleton}
 import play.api.libs.json.JsValue
+import play.api.libs.json.Json.toJson
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class CustomerProfileConnector @Inject()(http: CorePost, @Named("customer-profile") serviceUrl: String){
-  def versionCheck(inputRequest: JsValue, hc: HeaderCarrier)(implicit ec: ExecutionContext): Future[Boolean] =  {
+  def versionCheck(deviceVersion: DeviceVersion, hc: HeaderCarrier)(implicit ec: ExecutionContext): Future[Boolean] =  {
     implicit val hcHeaders: HeaderCarrier = hc.withExtraHeaders("Accept" -> "application/vnd.hmrc.1.0+json")
-    http.POST[JsValue, JsValue](s"$serviceUrl/profile/native-app/version-check", inputRequest).map(r => (r \ "upgrade").as[Boolean])
+    http.POST[JsValue, JsValue](s"$serviceUrl/profile/native-app/version-check", toJson(deviceVersion)).map(r => (r \ "upgrade").as[Boolean])
   }
 }

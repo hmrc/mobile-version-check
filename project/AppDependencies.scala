@@ -6,7 +6,8 @@ object AppDependencies {
 
   val compile = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-play-25" % "3.1.0"
+    "uk.gov.hmrc" %% "bootstrap-play-25" % "3.1.0",
+    "uk.gov.hmrc" %% "play-hmrc-api" % "2.1.0"
   )
 
   trait TestDependencies {

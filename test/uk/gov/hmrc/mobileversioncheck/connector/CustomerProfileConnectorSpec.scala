@@ -32,7 +32,7 @@ class CustomerProfileConnectorSpec extends UnitSpec with MockFactory {
 
   val http: CorePost = mock[CorePost]
   val connector = new CustomerProfileConnector(http, "someUrl")
-  val deviceInformation: JsValue = toJson(DeviceVersion(iOS, "0.1"))
+  val deviceVersion: JsValue = toJson(DeviceVersion(iOS, "0.1"))
 
   def mockHttpPost(result: Future[JsValue]): Unit =
     (http.POST(_: String, _: JsValue, _: Seq[(String,String)])
@@ -40,7 +40,7 @@ class CustomerProfileConnectorSpec extends UnitSpec with MockFactory {
 
   def upgradeRequired(upgrade: Boolean): JsValue = parse(s"""{ "upgrade": $upgrade }""")
 
-  val version: JsValue = toJson(DeviceVersion(iOS, "0.1"))
+  val version: DeviceVersion = DeviceVersion(iOS, "0.1")
 
   "version check" should {
     "return upgrade true when this is returned by customer profile" in  {
