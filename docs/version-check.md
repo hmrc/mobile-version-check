@@ -1,8 +1,8 @@
 version-check
 ----
-  Validate the mobile application version. The response to this service includes an upgrade status flag and, optionally, a Journey Id.
+Validate the mobile application version. The response to this service includes an upgrade status flag and, optionally, a Journey Id.
 
-  The upgrade status is determined using the supplied POST data.
+The upgrade status is determined using the supplied POST data.
   
 * **URL**
 
