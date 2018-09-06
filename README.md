@@ -17,7 +17,7 @@ The service exposes the following end point:
 
 
 # Sandbox
-The live endpointb is accessible in sandbox with the `/sandbox` prefix:
+The live endpoint is accessible in sandbox with the `/sandbox` prefix:
 ```
     POST /sandbox/mobile-version-check
 ```
