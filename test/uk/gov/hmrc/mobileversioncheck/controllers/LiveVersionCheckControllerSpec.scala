@@ -16,38 +16,23 @@
 
 package uk.gov.hmrc.mobileversioncheck.controllers
 
-import org.scalamock.scalatest.MockFactory
-import play.api.libs.json.JsValue
 import play.api.libs.json.Json.{parse, toJson}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.{Android, iOS}
+import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.Android
 import uk.gov.hmrc.mobileversioncheck.domain.{DeviceVersion, PreFlightCheckResponse}
 import uk.gov.hmrc.mobileversioncheck.service.VersionCheckService
-import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class LiveVersionCheckControllerSpec extends UnitSpec with MockFactory{
+class LiveVersionCheckControllerSpec extends BaseControllerSpec{
   val service: VersionCheckService = mock[VersionCheckService]
   val controller = new LiveVersionCheckController(service)
-
-  val iOSVersion = DeviceVersion(iOS, "0.1")
-  val iOSVersionJson: JsValue = toJson(iOSVersion)
-
-  implicit lazy val hc: HeaderCarrier = HeaderCarrier()
-
-  val journeyId = "journeyId"
 
   def mockServiceCall(upgrade: Boolean, optionalJourneyId: Option[String], deviceVersion: DeviceVersion = iOSVersion): Unit =
     (service.versionCheck(_: DeviceVersion, _: Option[String])(_: HeaderCarrier, _: ExecutionContext)).
       expects(deviceVersion, optionalJourneyId, *, *).returning( Future successful PreFlightCheckResponse(upgrade))
-
-
-  val acceptJsonHeader: (String, String) = "Accept" -> "application/vnd.hmrc.1.0+json"
-  val iOSRequest = FakeRequest().withBody(iOSVersionJson)
-  val iOSRequestWithValidHeaders = FakeRequest().withBody(iOSVersionJson).withHeaders(acceptJsonHeader)
 
   "version check" should {
     "return upgradeRequired true when a journey id is supplied" in {
@@ -56,7 +41,7 @@ class LiveVersionCheckControllerSpec extends UnitSpec with MockFactory{
       val result = await(controller.versionCheck(Some(journeyId))(iOSRequestWithValidHeaders))
 
       status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(s"""{"upgradeRequired":true}""")
+      contentAsJson(result) shouldBe parse(upgradeRequiredResult)
     }
 
     "return upgradeRequired false when a journey id is supplied" in {
@@ -65,7 +50,7 @@ class LiveVersionCheckControllerSpec extends UnitSpec with MockFactory{
       val result = await(controller.versionCheck(Some(journeyId))(iOSRequestWithValidHeaders))
 
       status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(s"""{"upgradeRequired":false}""")
+      contentAsJson(result) shouldBe parse(upgradeNotRequiredResult)
     }
 
     "return upgradeRequired true when no journey id is supplied" in {
@@ -74,7 +59,7 @@ class LiveVersionCheckControllerSpec extends UnitSpec with MockFactory{
       val result = await(controller.versionCheck(None)(iOSRequestWithValidHeaders))
 
       status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(s"""{"upgradeRequired":true}""")
+      contentAsJson(result) shouldBe parse(upgradeRequiredResult)
     }
 
     "return upgradeRequired false when no journey id is supplied" in {
@@ -83,10 +68,10 @@ class LiveVersionCheckControllerSpec extends UnitSpec with MockFactory{
       val result = await(controller.versionCheck(None)(iOSRequestWithValidHeaders))
 
       status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(s"""{"upgradeRequired":false}""")
+      contentAsJson(result) shouldBe parse(upgradeNotRequiredResult)
     }
 
-    "return an upgrade for android OS" in {
+    "return upgradeRequired result for android OS" in {
       val androidVersion = DeviceVersion(Android, "0.1")
 
       mockServiceCall(upgrade = true, None, androidVersion)
@@ -94,8 +79,7 @@ class LiveVersionCheckControllerSpec extends UnitSpec with MockFactory{
       val result = await(controller.versionCheck(None)(FakeRequest().withBody(toJson(androidVersion)).withHeaders(acceptJsonHeader)))
 
       status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(s"""{"upgradeRequired":true}""")
-
+      contentAsJson(result) shouldBe parse(upgradeRequiredResult)
     }
 
     "require the accept header" in {
