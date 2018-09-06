@@ -16,23 +16,17 @@
 
 package uk.gov.hmrc.mobileversioncheck.connector
 
-import org.scalamock.scalatest.MockFactory
-import play.api.libs.json.Json.{parse, toJson}
+import play.api.libs.json.Json.parse
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
-import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.iOS
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.mobileversioncheck.BaseSpec
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
-class CustomerProfileConnectorSpec extends UnitSpec with MockFactory {
-  implicit lazy val hc: HeaderCarrier = HeaderCarrier()
-
+class CustomerProfileConnectorSpec extends BaseSpec{
   val http: CorePost = mock[CorePost]
   val connector = new CustomerProfileConnector(http, "someUrl")
-  val deviceVersion: JsValue = toJson(DeviceVersion(iOS, "0.1"))
 
   def mockHttpPost(result: Future[JsValue]): Unit =
     (http.POST(_: String, _: JsValue, _: Seq[(String,String)])
@@ -40,17 +34,15 @@ class CustomerProfileConnectorSpec extends UnitSpec with MockFactory {
 
   def upgradeRequired(upgrade: Boolean): JsValue = parse(s"""{ "upgrade": $upgrade }""")
 
-  val version: DeviceVersion = DeviceVersion(iOS, "0.1")
-
   "version check" should {
     "return upgrade true when this is returned by customer profile" in  {
       mockHttpPost(upgradeRequired(true))
-      await(connector.versionCheck(version, hc)) shouldBe true
+      await(connector.versionCheck(iOSVersion, hc)) shouldBe true
     }
 
     "return upgrade false when this is returned by customer profile" in  {
       mockHttpPost(upgradeRequired(false))
-      await(connector.versionCheck(version, hc)) shouldBe false
+      await(connector.versionCheck(iOSVersion, hc)) shouldBe false
     }
   }
 }
