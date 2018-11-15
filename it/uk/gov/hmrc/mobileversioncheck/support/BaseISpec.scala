@@ -5,11 +5,7 @@ import org.scalatestplus.play.WsScalaTestClient
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.JsValue
-import play.api.libs.json.Json.toJson
 import play.api.libs.ws.WSClient
-import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
-import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.iOS
 import uk.gov.hmrc.play.test.UnitSpec
 
 class BaseISpec extends UnitSpec with Matchers with OptionValues with WsScalaTestClient with GuiceOneServerPerSuite with WireMockSupport {
@@ -21,12 +17,9 @@ class BaseISpec extends UnitSpec with Matchers with OptionValues with WsScalaTes
     "auditing.enabled" -> true,
     "microservice.services.auth.port" -> wireMockPort,
     "microservice.services.datastream.port" -> wireMockPort,
-    "microservice.services.customer-profile.port" -> wireMockPort,
     "auditing.consumer.baseUri.port" -> wireMockPort)
 
   protected def appBuilder: GuiceApplicationBuilder = new GuiceApplicationBuilder().configure(config)
 
   protected implicit lazy val wsClient: WSClient = app.injector.instanceOf[WSClient]
-
-  val deviceVersion: JsValue = toJson(DeviceVersion(iOS, "0.1"))
 }

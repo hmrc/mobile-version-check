@@ -20,8 +20,7 @@ import com.google.inject.Singleton
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.{JsError, JsValue, Json}
-import play.api.mvc.{Action, BodyParsers, Result}
-import play.api.mvc.Request
+import play.api.mvc.{Action, BodyParsers, Request, Result}
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.domain.{DeviceVersion, PreFlightCheckResponse}
@@ -31,7 +30,7 @@ import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait VersionCheckController extends BaseController with HeaderValidator{
+trait VersionCheckController extends BaseController with HeaderValidator {
   def versionCheck(journeyId: Option[String] = None): Action[JsValue] = validateAccept(acceptHeaderValidationRules).async(BodyParsers.parse.json) {
     implicit request =>
       request.body.validate[DeviceVersion].fold(
@@ -49,16 +48,16 @@ trait VersionCheckController extends BaseController with HeaderValidator{
 }
 
 @Singleton
-class LiveVersionCheckController @Inject()(val service: VersionCheckService) extends VersionCheckController{
+class LiveVersionCheckController @Inject()(val service: VersionCheckService) extends VersionCheckController {
   override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: Option[String])(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     service.versionCheck(deviceVersion, journeyId).map {
-      response => Ok(Json.toJson(response))
+      upgradeRequired => Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired)))
     }
   }
 }
 
 @Singleton
-class SandboxVersionCheckController extends VersionCheckController{
+class SandboxVersionCheckController extends VersionCheckController {
   override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: Option[String])(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     val result: Result = request.headers.get("SANDBOX-CONTROL") match {
       case Some("ERROR-500") => InternalServerError

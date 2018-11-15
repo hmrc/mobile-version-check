@@ -19,7 +19,7 @@ package uk.gov.hmrc.mobileversioncheck.domain
 import play.api.libs.json.Json.format
 import play.api.libs.json.OFormat
 
-case class DeviceVersion(os : NativeOS, version : String)
+case class DeviceVersion(os: NativeOS, version: String)
 
 object DeviceVersion {
   implicit val formats: OFormat[DeviceVersion] = format[DeviceVersion]
