@@ -17,21 +17,16 @@
 package uk.gov.hmrc.mobileversioncheck.config
 
 import com.google.inject.name.Named
-import com.google.inject.name.Names.named
 import com.google.inject.{AbstractModule, Provides}
 import play.api.Mode.Mode
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.http.CorePost
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 
 class GuiceModule(environment: Environment, configuration: Configuration) extends AbstractModule with ServicesConfig {
   override protected lazy val mode: Mode = environment.mode
   override protected lazy val runModeConfiguration: Configuration = configuration
 
-  override def configure(): Unit = {
-    bind(classOf[CorePost]).to(classOf[WSHttpImpl])
-    bind(classOf[String]).annotatedWith(named("customer-profile")).toInstance(baseUrl("customer-profile"))
-  }
+  override def configure(): Unit = ()
 
   @Provides
   @Named("appName")

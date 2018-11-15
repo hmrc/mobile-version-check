@@ -16,48 +16,78 @@
 
 package uk.gov.hmrc.mobileversioncheck.service
 
+import org.scalamock.handlers.CallHandler3
+import org.scalamock.matchers.MatcherBase
+import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.BaseSpec
-import uk.gov.hmrc.mobileversioncheck.connector.CustomerProfileConnector
 import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
+import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.{Android, iOS}
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
+import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
+import uk.gov.hmrc.play.audit.model.DataEvent
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class VersionCheckServiceSpec extends BaseSpec {
-  val connector: CustomerProfileConnector = mock[CustomerProfileConnector]
-  val service = new VersionCheckService(connector)
+  val appNameConfiguration: Configuration = mock[Configuration]
+  val auditConnector: AuditConnector = mock[AuditConnector]
 
-  def mockConnectorVersionCheck(upgrade: Boolean) =
-    (connector.versionCheck(_: DeviceVersion, _: HeaderCarrier)(_: ExecutionContext)).expects(iOSVersion, *, *).returning(Future successful upgrade)
+  val appName = "mobile-version-check"
 
-  "version check" should {
-    "return upgradeRequired true when a journey id is supplied" in {
-      mockConnectorVersionCheck(upgrade = false)
-      val result = await(service.versionCheck(iOSVersion, Some(journeyId)))
+  val service = new VersionCheckService(appNameConfiguration, auditConnector)
 
-      result.upgradeRequired shouldBe false
+  def mockAudit(transactionName: String, detail: Map[String, String] = Map.empty): CallHandler3[DataEvent, HeaderCarrier, ExecutionContext, Future[AuditResult]] = {
+    def dataEventWith(auditSource: String,
+                      auditType: String,
+                      tags: Map[String, String]): MatcherBase = {
+      argThat((dataEvent: DataEvent) => {
+        dataEvent.auditSource.equals(auditSource) &&
+          dataEvent.auditType.equals(auditType) &&
+          dataEvent.tags.equals(tags) &&
+          dataEvent.detail.equals(detail)
+      })
     }
 
-    "return upgradeRequired false when a journey id is supplied" in {
-      mockConnectorVersionCheck(upgrade = true)
-      val result = await(service.versionCheck(iOSVersion, Some(journeyId)))
+    (appNameConfiguration.getString(_: String, _: Option[Set[String]])).expects(
+      "appName", None).returns(Some(appName)).anyNumberOfTimes()
 
-      result.upgradeRequired shouldBe true
+    (auditConnector.sendEvent(_: DataEvent)(_: HeaderCarrier, _: ExecutionContext)).expects(
+      dataEventWith(appName, auditType = "ServiceResponseSent", tags = Map("transactionName" -> transactionName)), *, *).returns(
+      Future successful Success)
+  }
+
+  "versionCheck" should {
+    "audit and not require an upgrade for the configured lower bound version of iOS" in {
+      mockAudit(transactionName = "upgradeRequired", Map("os" -> "ios"))
+      await(service.versionCheck(DeviceVersion(iOS, "3.0.7"))) shouldBe false
     }
 
-    "return upgradeRequired true when no journey id is supplied" in {
-      mockConnectorVersionCheck(upgrade = false)
-      val result = await(service.versionCheck(iOSVersion, None))
-
-      result.upgradeRequired shouldBe false
+    "audit and not require an upgrade below the configured lower bound version of iOS" in {
+      mockAudit(transactionName = "upgradeRequired", Map("os" -> "ios"))
+      await(service.versionCheck(DeviceVersion(iOS, "3.0.6"))) shouldBe true
     }
 
-    "return upgradeRequired false when no journey id is supplied" in {
-      mockConnectorVersionCheck(upgrade = true)
-      val result = await(service.versionCheck(iOSVersion, None))
+    "audit and not require an upgrade above the configured lower bound version of iOS" in {
+      mockAudit(transactionName = "upgradeRequired", Map("os" -> "ios"))
+      await(service.versionCheck(DeviceVersion(iOS, "3.0.8"))) shouldBe false
+    }
 
-      result.upgradeRequired shouldBe true
+    "audit and not require an upgrade for the configured lower bound version of android" in {
+      mockAudit(transactionName = "upgradeRequired", Map("os" -> "android"))
+      await(service.versionCheck(DeviceVersion(Android, "5.0.22"))) shouldBe false
+    }
+
+    "audit and not require an upgrade below the configured lower bound version of android" in {
+      mockAudit(transactionName = "upgradeRequired", Map("os" -> "android"))
+      await(service.versionCheck(DeviceVersion(Android, "5.0.21"))) shouldBe true
+    }
+
+    "audit and not require an upgrade above the configured lower bound version of android" in {
+      mockAudit(transactionName = "upgradeRequired", Map("os" -> "android"))
+      await(service.versionCheck(DeviceVersion(Android, "5.0.23"))) shouldBe false
     }
   }
+
 }

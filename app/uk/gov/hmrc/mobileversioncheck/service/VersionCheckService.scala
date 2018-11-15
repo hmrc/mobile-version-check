@@ -17,17 +17,22 @@
 package uk.gov.hmrc.mobileversioncheck.service
 
 import com.google.inject.{Inject, Singleton}
+import play.api.Configuration
+import uk.gov.hmrc.api.service.Auditor
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.mobileversioncheck.connector.CustomerProfileConnector
-import uk.gov.hmrc.mobileversioncheck.domain.{DeviceVersion, PreFlightCheckResponse}
+import uk.gov.hmrc.mobileversioncheck.domain.{DeviceVersion, ValidateAppVersion}
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class VersionCheckService @Inject()(connector: CustomerProfileConnector){
-  def versionCheck(deviceVersion: DeviceVersion, journeyId: Option[String] = None)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[PreFlightCheckResponse] = {
-    connector.versionCheck(deviceVersion, hc).map{ upgrade =>
-      PreFlightCheckResponse(upgrade)
+class VersionCheckService @Inject()(val appNameConfiguration: Configuration,
+                                    val auditConnector: AuditConnector) extends Auditor {
+
+  def versionCheck(deviceVersion: DeviceVersion, journeyId: Option[String] = None)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Boolean] = {
+    withAudit("upgradeRequired", Map("os" -> deviceVersion.os.toString)) {
+      ValidateAppVersion.upgrade(deviceVersion)
     }
   }
+
 }
