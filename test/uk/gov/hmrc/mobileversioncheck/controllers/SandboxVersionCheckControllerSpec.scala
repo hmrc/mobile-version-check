@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,16 @@ import play.api.test.Helpers.{contentAsJson, _}
 import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.Android
 
-class SandboxVersionCheckControllerSpec extends BaseControllerSpec{
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
   val controller = new SandboxVersionCheckController
 
   val sandboxControlHeader = "SANDBOX-CONTROL"
-  val androidVersion = DeviceVersion(Android, "0.1")
+  val androidVersion       = DeviceVersion(Android, "0.1")
 
-  val requestWithoutOS: FakeRequest[JsValue] = FakeRequest().withBody(parse("""{ "version": "1.0" }""")).withHeaders(acceptJsonHeader)
-  val requestWithoutVersion: FakeRequest[JsValue] = FakeRequest().withBody(parse("""{ "os": "iOS" }""")).withHeaders(acceptJsonHeader)
+  val requestWithoutOS              : FakeRequest[JsValue] = FakeRequest().withBody(parse("""{ "version": "1.0" }""")).withHeaders(acceptJsonHeader)
+  val requestWithoutVersion         : FakeRequest[JsValue] = FakeRequest().withBody(parse("""{ "os": "iOS" }""")).withHeaders(acceptJsonHeader)
   val androidRequestWithAcceptHeader: FakeRequest[JsValue] = FakeRequest().withBody(toJson(androidVersion)).withHeaders(acceptJsonHeader)
 
   "version check without SANDBOX-CONTROL header specified" should {

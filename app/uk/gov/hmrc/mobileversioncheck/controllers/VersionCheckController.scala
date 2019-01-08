@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,11 @@ import uk.gov.hmrc.mobileversioncheck.domain.{DeviceVersion, PreFlightCheckRespo
 import uk.gov.hmrc.mobileversioncheck.service.VersionCheckService
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait VersionCheckController extends BaseController with HeaderValidator {
+  implicit def ec:ExecutionContext
+
   def versionCheck(journeyId: Option[String] = None): Action[JsValue] = validateAccept(acceptHeaderValidationRules).async(BodyParsers.parse.json) {
     implicit request =>
       request.body.validate[DeviceVersion].fold(
@@ -48,7 +49,7 @@ trait VersionCheckController extends BaseController with HeaderValidator {
 }
 
 @Singleton
-class LiveVersionCheckController @Inject()(val service: VersionCheckService) extends VersionCheckController {
+class LiveVersionCheckController @Inject()(val service: VersionCheckService)(implicit val ec: ExecutionContext) extends VersionCheckController {
   override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: Option[String])(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     service.versionCheck(deviceVersion, journeyId).map {
       upgradeRequired => Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired)))
@@ -57,7 +58,7 @@ class LiveVersionCheckController @Inject()(val service: VersionCheckService) ext
 }
 
 @Singleton
-class SandboxVersionCheckController extends VersionCheckController {
+class SandboxVersionCheckController @Inject()(implicit val ec: ExecutionContext) extends VersionCheckController {
   override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: Option[String])(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     val result: Result = request.headers.get("SANDBOX-CONTROL") match {
       case Some("ERROR-500") => InternalServerError
