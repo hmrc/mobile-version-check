@@ -17,37 +17,38 @@
 package uk.gov.hmrc.mobileversioncheck.domain
 
 import com.typesafe.config.{Config, ConfigFactory}
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatestplus.play.PlaySpec
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.{Android, iOS}
-import uk.gov.hmrc.play.test.UnitSpec
 
-class ValidateAppVersionSpec extends UnitSpec {
+class ValidateAppVersionSpec extends PlaySpec with ScalaFutures {
 
-  def validateAppVersion(iosVersionRange: String = "[0.0.1,)", androidVersionRange: String = "[0.0.1,)"): ValidateAppVersion = new ValidateAppVersion {
-    override lazy val config: Config = ConfigFactory.parseString(
-      s"""approvedAppVersions {
+  def validateAppVersion(iosVersionRange: String = "[0.0.1,)", androidVersionRange: String = "[0.0.1,)"): ValidateAppVersion =
+    new ValidateAppVersion {
+      override lazy val config: Config = ConfigFactory.parseString(s"""approvedAppVersions {
          |  ios = "$iosVersionRange"
          |  android = "$androidVersionRange"
          |}
          | """.stripMargin)
-  }
+    }
 
   "Validating app version" should {
     "app version 1.2.0 valid" in {
       val deviceVersion = DeviceVersion(iOS, "1.2.0")
-      await(validateAppVersion().upgrade(deviceVersion)) shouldBe false
+      validateAppVersion().upgrade(deviceVersion).futureValue mustBe false
     }
     "app version 1.3.0 valid" in {
       val deviceVersion = DeviceVersion(Android, "1.3.0")
-      await(validateAppVersion("[1.3.0,)").upgrade(deviceVersion)) shouldBe false
+      validateAppVersion("[1.3.0,)").upgrade(deviceVersion).futureValue mustBe false
     }
 
     "upgrade required for iOS app version 1.0.0 valid" in {
       val deviceVersion = DeviceVersion(iOS, "1.0.0")
-      await(validateAppVersion("[1.2.0,1.3.0]").upgrade(deviceVersion)) shouldBe true
+      validateAppVersion("[1.2.0,1.3.0]").upgrade(deviceVersion).futureValue mustBe true
     }
     "upgrade required for Android app version 1.0.0 valid" in {
       val deviceVersion = DeviceVersion(Android, "1.0.0")
-      await(validateAppVersion(androidVersionRange = "[1.2.0,1.3.0]").upgrade(deviceVersion)) shouldBe true
+      validateAppVersion(androidVersionRange = "[1.2.0,1.3.0]").upgrade(deviceVersion).futureValue mustBe true
     }
   }
 }

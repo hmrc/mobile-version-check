@@ -29,47 +29,49 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class LiveVersionCheckControllerSpec extends BaseControllerSpec {
   val service: VersionCheckService = mock[VersionCheckService]
-  val controller                   = new LiveVersionCheckController(service)
+  val controller = new LiveVersionCheckController(service, stubControllerComponents())
 
   def mockServiceCall(upgradeRequired: Boolean, optionalJourneyId: Option[String], deviceVersion: DeviceVersion = iOSVersion): Unit =
-    (service.versionCheck(_: DeviceVersion, _: Option[String])(_: HeaderCarrier, _: ExecutionContext)).
-      expects(deviceVersion, optionalJourneyId, *, *).returning(Future successful upgradeRequired)
+    (service
+      .versionCheck(_: DeviceVersion, _: Option[String])(_: HeaderCarrier, _: ExecutionContext))
+      .expects(deviceVersion, optionalJourneyId, *, *)
+      .returning(Future successful upgradeRequired)
 
   "version check" should {
     "return upgradeRequired true when a journey id is supplied" in {
       mockServiceCall(upgradeRequired = true, Some(journeyId))
 
-      val result = await(controller.versionCheck(Some(journeyId))(iOSRequestWithValidHeaders))
+      val result = controller.versionCheck(Some(journeyId))(iOSRequestWithValidHeaders)
 
-      status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(upgradeRequiredResult)
+      status(result)        mustBe 200
+      contentAsJson(result) mustBe parse(upgradeRequiredResult)
     }
 
     "return upgradeRequired false when a journey id is supplied" in {
       mockServiceCall(upgradeRequired = false, Some(journeyId))
 
-      val result = await(controller.versionCheck(Some(journeyId))(iOSRequestWithValidHeaders))
+      val result = controller.versionCheck(Some(journeyId))(iOSRequestWithValidHeaders)
 
-      status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(upgradeNotRequiredResult)
+      status(result)        mustBe 200
+      contentAsJson(result) mustBe parse(upgradeNotRequiredResult)
     }
 
     "return upgradeRequired true when no journey id is supplied" in {
       mockServiceCall(upgradeRequired = true, None)
 
-      val result = await(controller.versionCheck(None)(iOSRequestWithValidHeaders))
+      val result = controller.versionCheck(None)(iOSRequestWithValidHeaders)
 
-      status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(upgradeRequiredResult)
+      status(result)        mustBe 200
+      contentAsJson(result) mustBe parse(upgradeRequiredResult)
     }
 
     "return upgradeRequired false when no journey id is supplied" in {
       mockServiceCall(upgradeRequired = false, None)
 
-      val result = await(controller.versionCheck(None)(iOSRequestWithValidHeaders))
+      val result = controller.versionCheck(None)(iOSRequestWithValidHeaders)
 
-      status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(upgradeNotRequiredResult)
+      status(result)        mustBe 200
+      contentAsJson(result) mustBe parse(upgradeNotRequiredResult)
     }
 
     "return upgradeRequired result for android OS" in {
@@ -77,27 +79,27 @@ class LiveVersionCheckControllerSpec extends BaseControllerSpec {
 
       mockServiceCall(upgradeRequired = true, None, androidVersion)
 
-      val result = await(controller.versionCheck(None)(FakeRequest().withBody(toJson(androidVersion)).withHeaders(acceptJsonHeader)))
+      val result = controller.versionCheck(None)(FakeRequest().withBody(toJson(androidVersion)).withHeaders(acceptJsonHeader))
 
-      status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(upgradeRequiredResult)
+      status(result)        mustBe 200
+      contentAsJson(result) mustBe parse(upgradeRequiredResult)
     }
 
     "require the accept header" in {
-      val result = await(controller.versionCheck(None)(iOSRequest))
-      status(result) shouldBe 406
+      val result = controller.versionCheck(None)(iOSRequest)
+      status(result) mustBe 406
     }
 
     "require an app OS" in {
       val invalidRequest = FakeRequest().withBody(parse("""{ "version": "1.0" }""")).withHeaders(acceptJsonHeader)
-      val result = await(controller.versionCheck(None)(invalidRequest))
-      status(result) shouldBe 400
+      val result         = controller.versionCheck(None)(invalidRequest)
+      status(result) mustBe 400
     }
 
     "require a version" in {
       val invalidRequest = FakeRequest().withBody(parse("""{ "os": "iOS" }""")).withHeaders(acceptJsonHeader)
-      val result = await(controller.versionCheck(None)(invalidRequest))
-      status(result) shouldBe 400
+      val result         = controller.versionCheck(None)(invalidRequest)
+      status(result) mustBe 400
     }
   }
 }

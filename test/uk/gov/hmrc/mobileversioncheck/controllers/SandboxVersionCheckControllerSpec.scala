@@ -28,159 +28,158 @@ import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.Android
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
-  val controller = new SandboxVersionCheckController
+  val controller = new SandboxVersionCheckController(stubControllerComponents())
 
   val sandboxControlHeader = "SANDBOX-CONTROL"
   val androidVersion       = DeviceVersion(Android, "0.1")
 
-  val requestWithoutOS              : FakeRequest[JsValue] = FakeRequest().withBody(parse("""{ "version": "1.0" }""")).withHeaders(acceptJsonHeader)
-  val requestWithoutVersion         : FakeRequest[JsValue] = FakeRequest().withBody(parse("""{ "os": "iOS" }""")).withHeaders(acceptJsonHeader)
+  val requestWithoutOS:               FakeRequest[JsValue] = FakeRequest().withBody(parse("""{ "version": "1.0" }""")).withHeaders(acceptJsonHeader)
+  val requestWithoutVersion:          FakeRequest[JsValue] = FakeRequest().withBody(parse("""{ "os": "iOS" }""")).withHeaders(acceptJsonHeader)
   val androidRequestWithAcceptHeader: FakeRequest[JsValue] = FakeRequest().withBody(toJson(androidVersion)).withHeaders(acceptJsonHeader)
 
   "version check without SANDBOX-CONTROL header specified" should {
     "return upgradeRequired false when a journey id is supplied" in {
-      val result = await(controller.versionCheck(Some(journeyId))(iOSRequestWithValidHeaders))
-      status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(upgradeNotRequiredResult)
+      val result = controller.versionCheck(Some(journeyId))(iOSRequestWithValidHeaders)
+      status(result)        mustBe 200
+      contentAsJson(result) mustBe parse(upgradeNotRequiredResult)
     }
 
     "return upgradeRequired false when no journey id is supplied" in {
-      val result = await(controller.versionCheck(None)(iOSRequestWithValidHeaders))
-      status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(upgradeNotRequiredResult)
+      val result = controller.versionCheck(None)(iOSRequestWithValidHeaders)
+      status(result)        mustBe 200
+      contentAsJson(result) mustBe parse(upgradeNotRequiredResult)
     }
 
     "return upgradeRequired result for android OS" in {
-      val result = await(controller.versionCheck(None)(androidRequestWithAcceptHeader))
-      status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(upgradeNotRequiredResult)
+      val result = controller.versionCheck(None)(androidRequestWithAcceptHeader)
+      status(result)        mustBe 200
+      contentAsJson(result) mustBe parse(upgradeNotRequiredResult)
     }
 
     "require the accept header" in {
-      val result = await(controller.versionCheck(None)(iOSRequest))
-      status(result) shouldBe 406
+      val result = controller.versionCheck(None)(iOSRequest)
+      status(result) mustBe 406
     }
 
     "require an app OS" in {
-      val result = await(controller.versionCheck(None)(requestWithoutOS))
-      status(result) shouldBe 400
+      val result = controller.versionCheck(None)(requestWithoutOS)
+      status(result) mustBe 400
     }
 
     "require a version" in {
-      val result = await(controller.versionCheck(None)(requestWithoutVersion))
-      status(result) shouldBe 400
+      val result = controller.versionCheck(None)(requestWithoutVersion)
+      status(result) mustBe 400
     }
   }
 
   "version check with random SANDBOX-CONTROL header supplied" should {
-    val sandboxHeader = sandboxControlHeader -> randomUUID().toString
+    val sandboxHeader                            = sandboxControlHeader -> randomUUID().toString
     val iosRequestWithRandomSandboxControlHeader = iOSRequestWithValidHeaders.withHeaders(sandboxHeader)
 
     "return upgradeRequired false when a journey id is supplied" in {
-      val result = await(controller.versionCheck(Some(journeyId))(iosRequestWithRandomSandboxControlHeader))
-      status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(upgradeNotRequiredResult)
+      val result = controller.versionCheck(Some(journeyId))(iosRequestWithRandomSandboxControlHeader)
+      status(result)        mustBe 200
+      contentAsJson(result) mustBe parse(upgradeNotRequiredResult)
     }
 
     "return upgradeRequired false when no journey id is supplied" in {
-      val result = await(controller.versionCheck(None)(iosRequestWithRandomSandboxControlHeader))
-      status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(upgradeNotRequiredResult)
+      val result = controller.versionCheck(None)(iosRequestWithRandomSandboxControlHeader)
+      status(result)        mustBe 200
+      contentAsJson(result) mustBe parse(upgradeNotRequiredResult)
     }
 
     "return upgradeRequired result for android OS" in {
-      val result = await(controller.versionCheck(None)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader)))
-      status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(upgradeNotRequiredResult)
+      val result = controller.versionCheck(None)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
+      status(result)        mustBe 200
+      contentAsJson(result) mustBe parse(upgradeNotRequiredResult)
     }
 
     "require the accept header" in {
-      val result = await(controller.versionCheck(None)(iOSRequest.withHeaders(sandboxHeader)))
-      status(result) shouldBe 406
+      val result = controller.versionCheck(None)(iOSRequest.withHeaders(sandboxHeader))
+      status(result) mustBe 406
     }
 
     "require an app OS" in {
-      val result = await(controller.versionCheck(None)(requestWithoutOS.withHeaders(sandboxHeader)))
-      status(result) shouldBe 400
+      val result = controller.versionCheck(None)(requestWithoutOS.withHeaders(sandboxHeader))
+      status(result) mustBe 400
     }
 
     "require a version" in {
-      val result = await(controller.versionCheck(None)(requestWithoutVersion.withHeaders(sandboxHeader)))
-      status(result) shouldBe 400
+      val result = controller.versionCheck(None)(requestWithoutVersion.withHeaders(sandboxHeader))
+      status(result) mustBe 400
     }
   }
 
   "version check with 'ERROR-500' SANDBOX-CONTROL header supplied" should {
-    val sandboxHeader = sandboxControlHeader -> "ERROR-500"
+    val sandboxHeader                            = sandboxControlHeader -> "ERROR-500"
     val iosRequestWithRandomSandboxControlHeader = iOSRequestWithValidHeaders.withHeaders(sandboxHeader)
 
     "return 500 false when a journey id is supplied" in {
-      val result = await(controller.versionCheck(Some(journeyId))(iosRequestWithRandomSandboxControlHeader))
-      status(result) shouldBe 500
+      val result = controller.versionCheck(Some(journeyId))(iosRequestWithRandomSandboxControlHeader)
+      status(result) mustBe 500
     }
 
     "return upgradeRequired false when no journey id is supplied" in {
-      val result = await(controller.versionCheck(None)(iosRequestWithRandomSandboxControlHeader))
-      status(result) shouldBe 500
+      val result = controller.versionCheck(None)(iosRequestWithRandomSandboxControlHeader)
+      status(result) mustBe 500
     }
 
     "return upgradeRequired result for android OS" in {
-      val result = await(controller.versionCheck(None)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader)))
-      status(result) shouldBe 500
+      val result = controller.versionCheck(None)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
+      status(result) mustBe 500
     }
 
     "require the accept header" in {
-      val result = await(controller.versionCheck(None)(iOSRequest.withHeaders(sandboxHeader)))
-      status(result) shouldBe 406
+      val result = controller.versionCheck(None)(iOSRequest.withHeaders(sandboxHeader))
+      status(result) mustBe 406
     }
 
     "require an app OS" in {
-      val result = await(controller.versionCheck(None)(requestWithoutOS.withHeaders(sandboxHeader)))
-      status(result) shouldBe 400
+      val result = controller.versionCheck(None)(requestWithoutOS.withHeaders(sandboxHeader))
+      status(result) mustBe 400
     }
 
     "require a version" in {
-      val result = await(controller.versionCheck(None)(requestWithoutVersion.withHeaders(sandboxHeader)))
-      status(result) shouldBe 400
+      val result = controller.versionCheck(None)(requestWithoutVersion.withHeaders(sandboxHeader))
+      status(result) mustBe 400
     }
   }
 
   "version check with 'UPGRADE-REQUIRED' SANDBOX-CONTROL header supplied" should {
-    val sandboxHeader = sandboxControlHeader -> "UPGRADE-REQUIRED"
+    val sandboxHeader                            = sandboxControlHeader -> "UPGRADE-REQUIRED"
     val iosRequestWithRandomSandboxControlHeader = iOSRequestWithValidHeaders.withHeaders(sandboxHeader)
 
-
     "return upgradeRequired false when a journey id is supplied" in {
-      val result = await(controller.versionCheck(Some(journeyId))(iosRequestWithRandomSandboxControlHeader))
-      status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(upgradeRequiredResult)
+      val result = controller.versionCheck(Some(journeyId))(iosRequestWithRandomSandboxControlHeader)
+      status(result)        mustBe 200
+      contentAsJson(result) mustBe parse(upgradeRequiredResult)
     }
 
     "return upgradeRequired false when no journey id is supplied" in {
-      val result = await(controller.versionCheck(None)(iosRequestWithRandomSandboxControlHeader))
-      status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(upgradeRequiredResult)
+      val result = controller.versionCheck(None)(iosRequestWithRandomSandboxControlHeader)
+      status(result)        mustBe 200
+      contentAsJson(result) mustBe parse(upgradeRequiredResult)
     }
 
     "return upgradeRequired result for android OS" in {
-      val result = await(controller.versionCheck(None)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader)))
-      status(result) shouldBe 200
-      contentAsJson(result) shouldBe parse(upgradeRequiredResult)
+      val result = controller.versionCheck(None)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
+      status(result)        mustBe 200
+      contentAsJson(result) mustBe parse(upgradeRequiredResult)
     }
 
     "require the accept header" in {
-      val result = await(controller.versionCheck(None)(iOSRequest.withHeaders(sandboxHeader)))
-      status(result) shouldBe 406
+      val result = controller.versionCheck(None)(iOSRequest.withHeaders(sandboxHeader))
+      status(result) mustBe 406
     }
 
     "require an app OS" in {
-      val result = await(controller.versionCheck(None)(requestWithoutOS.withHeaders(sandboxHeader)))
-      status(result) shouldBe 400
+      val result = controller.versionCheck(None)(requestWithoutOS.withHeaders(sandboxHeader))
+      status(result) mustBe 400
     }
 
     "require a version" in {
-      val result = await(controller.versionCheck(None)(requestWithoutVersion.withHeaders(sandboxHeader)))
-      status(result) shouldBe 400
+      val result = controller.versionCheck(None)(requestWithoutVersion.withHeaders(sandboxHeader))
+      status(result) mustBe 400
     }
   }
 }
