@@ -18,21 +18,23 @@ package uk.gov.hmrc.mobileversioncheck.service
 
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
-import uk.gov.hmrc.api.service.Auditor
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.domain.{DeviceVersion, ValidateAppVersion}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.bootstrap.config.AppName
+import uk.gov.hmrc.service.Auditor
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class VersionCheckService @Inject()(val appNameConfiguration: Configuration,
-                                    val auditConnector: AuditConnector) extends Auditor {
+class VersionCheckService @Inject()(val configuration: Configuration, val auditConnector: AuditConnector) extends Auditor {
 
-  def versionCheck(deviceVersion: DeviceVersion, journeyId: Option[String] = None)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Boolean] = {
+  def versionCheck(deviceVersion: DeviceVersion, journeyId: Option[String] = None)(
+    implicit hc:                  HeaderCarrier,
+    ex:                           ExecutionContext): Future[Boolean] =
     withAudit("upgradeRequired", Map("os" -> deviceVersion.os.toString)) {
       ValidateAppVersion.upgrade(deviceVersion)
     }
-  }
 
+  override def appName: String = AppName.fromConfiguration(configuration)
 }

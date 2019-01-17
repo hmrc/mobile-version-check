@@ -18,7 +18,7 @@ package uk.gov.hmrc.mobileversioncheck.service
 
 import org.scalamock.handlers.CallHandler3
 import org.scalamock.matchers.MatcherBase
-import play.api.Configuration
+import play.api.{ConfigLoader, Configuration}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.BaseSpec
 import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
@@ -31,62 +31,61 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class VersionCheckServiceSpec extends BaseSpec {
-  val appNameConfiguration: Configuration = mock[Configuration]
-  val auditConnector: AuditConnector = mock[AuditConnector]
+  val appNameConfiguration: Configuration  = mock[Configuration]
+  val auditConnector:       AuditConnector = mock[AuditConnector]
 
   val appName = "mobile-version-check"
 
   val service = new VersionCheckService(appNameConfiguration, auditConnector)
 
-  def mockAudit(transactionName: String, detail: Map[String, String] = Map.empty): CallHandler3[DataEvent, HeaderCarrier, ExecutionContext, Future[AuditResult]] = {
-    def dataEventWith(auditSource: String,
-                      auditType: String,
-                      tags: Map[String, String]): MatcherBase = {
+  def mockAudit(
+    transactionName: String,
+    detail:          Map[String, String] = Map.empty): CallHandler3[DataEvent, HeaderCarrier, ExecutionContext, Future[AuditResult]] = {
+    def dataEventWith(auditSource: String, auditType: String, tags: Map[String, String]): MatcherBase =
       argThat((dataEvent: DataEvent) => {
         dataEvent.auditSource.equals(auditSource) &&
-          dataEvent.auditType.equals(auditType) &&
-          dataEvent.tags.equals(tags) &&
-          dataEvent.detail.equals(detail)
+        dataEvent.auditType.equals(auditType) &&
+        dataEvent.tags.equals(tags) &&
+        dataEvent.detail.equals(detail)
       })
-    }
 
-    (appNameConfiguration.getString(_: String, _: Option[Set[String]])).expects(
-      "appName", None).returns(Some(appName)).anyNumberOfTimes()
+    (appNameConfiguration.get[String](_: String)(_: ConfigLoader[String])).expects("appName", *).returns(appName).anyNumberOfTimes()
 
-    (auditConnector.sendEvent(_: DataEvent)(_: HeaderCarrier, _: ExecutionContext)).expects(
-      dataEventWith(appName, auditType = "ServiceResponseSent", tags = Map("transactionName" -> transactionName)), *, *).returns(
-      Future successful Success)
+    (auditConnector
+      .sendEvent(_: DataEvent)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(dataEventWith(appName, auditType = "ServiceResponseSent", tags = Map("transactionName" -> transactionName)), *, *)
+      .returns(Future successful Success)
   }
 
   "versionCheck" should {
     "audit and not require an upgrade for the configured lower bound version of iOS" in {
       mockAudit(transactionName = "upgradeRequired", Map("os" -> "ios"))
-      await(service.versionCheck(DeviceVersion(iOS, "3.0.7"))) shouldBe false
+      service.versionCheck(DeviceVersion(iOS, "3.0.7")).futureValue mustBe false
     }
 
     "audit and not require an upgrade below the configured lower bound version of iOS" in {
       mockAudit(transactionName = "upgradeRequired", Map("os" -> "ios"))
-      await(service.versionCheck(DeviceVersion(iOS, "3.0.6"))) shouldBe true
+      service.versionCheck(DeviceVersion(iOS, "3.0.6")).futureValue mustBe true
     }
 
     "audit and not require an upgrade above the configured lower bound version of iOS" in {
       mockAudit(transactionName = "upgradeRequired", Map("os" -> "ios"))
-      await(service.versionCheck(DeviceVersion(iOS, "3.0.8"))) shouldBe false
+      service.versionCheck(DeviceVersion(iOS, "3.0.8")).futureValue mustBe false
     }
 
     "audit and not require an upgrade for the configured lower bound version of android" in {
       mockAudit(transactionName = "upgradeRequired", Map("os" -> "android"))
-      await(service.versionCheck(DeviceVersion(Android, "5.0.22"))) shouldBe false
+      service.versionCheck(DeviceVersion(Android, "5.0.22")).futureValue mustBe false
     }
 
     "audit and not require an upgrade below the configured lower bound version of android" in {
       mockAudit(transactionName = "upgradeRequired", Map("os" -> "android"))
-      await(service.versionCheck(DeviceVersion(Android, "5.0.21"))) shouldBe true
+      service.versionCheck(DeviceVersion(Android, "5.0.21")).futureValue mustBe true
     }
 
     "audit and not require an upgrade above the configured lower bound version of android" in {
       mockAudit(transactionName = "upgradeRequired", Map("os" -> "android"))
-      await(service.versionCheck(DeviceVersion(Android, "5.0.23"))) shouldBe false
+      service.versionCheck(DeviceVersion(Android, "5.0.23")).futureValue mustBe false
     }
   }
 

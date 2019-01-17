@@ -18,12 +18,11 @@ package uk.gov.hmrc.mobileversioncheck.domain
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory.parseString
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, WordSpecLike}
 
-class ApprovedAppVersionsSpec extends UnitSpec {
+class ApprovedAppVersionsSpec extends WordSpecLike with Matchers {
 
-  val specConfig: Config = parseString(
-    """approvedAppVersions {
+  val specConfig: Config = parseString("""approvedAppVersions {
       |  ios = "[0.0.1,)"
       |  android = "[0.0.1,)"
       |}

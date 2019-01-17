@@ -16,19 +16,13 @@
 
 package uk.gov.hmrc.mobileversioncheck.config
 
-import com.google.inject.name.Named
-import com.google.inject.{AbstractModule, Provides}
-import play.api.Mode.Mode
+import com.google.inject.AbstractModule
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
-class GuiceModule(environment: Environment, configuration: Configuration) extends AbstractModule with ServicesConfig {
-  override protected lazy val mode: Mode = environment.mode
-  override protected lazy val runModeConfiguration: Configuration = configuration
+class GuiceModule(environment: Environment, configuration: Configuration) extends AbstractModule {
+
+  val servicesConfig = new ServicesConfig(configuration, new RunMode(configuration, environment.mode))
 
   override def configure(): Unit = ()
-
-  @Provides
-  @Named("appName")
-  def appName: String = AppName(configuration).appName
 }
