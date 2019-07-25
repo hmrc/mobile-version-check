@@ -32,7 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 trait VersionCheckController extends BackendBaseController with HeaderValidator {
   implicit def executionContext: ExecutionContext
 
-  def versionCheck(journeyId: Option[String] = None): Action[JsValue] =
+  def versionCheck(journeyId: String): Action[JsValue] =
     validateAccept(acceptHeaderValidationRules).async(controllerComponents.parsers.json) { implicit request =>
       request.body
         .validate[DeviceVersion]
@@ -47,7 +47,7 @@ trait VersionCheckController extends BackendBaseController with HeaderValidator 
         )
     }
 
-  def doVersionCheck(deviceVersion: DeviceVersion, journeyId: Option[String])(implicit hc: HeaderCarrier, request: Request[_]): Future[Result]
+  def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result]
 }
 
 @Singleton
@@ -59,7 +59,7 @@ class LiveVersionCheckController @Inject()(
     with VersionCheckController {
   override def parser: BodyParser[AnyContent] = cc.parsers.anyContent
 
-  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: Option[String])(
+  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String)(
     implicit hc:                             HeaderCarrier,
     request:                                 Request[_]): Future[Result] =
     service.versionCheck(deviceVersion, journeyId).map { upgradeRequired =>
@@ -76,7 +76,7 @@ class SandboxVersionCheckController @Inject()(
     with VersionCheckController {
   override def parser: BodyParser[AnyContent] = cc.parsers.anyContent
 
-  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: Option[String])(
+  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String)(
     implicit hc:                             HeaderCarrier,
     request:                                 Request[_]): Future[Result] = {
 

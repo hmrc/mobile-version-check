@@ -9,7 +9,7 @@ import uk.gov.hmrc.mobileversioncheck.support.BaseISpec
 class SandboxMobileVersionCheckISpec extends BaseISpec {
   val mobileIdHeader: (String, String) = "X-MOBILE-USER-ID" -> "208606423740"
 
-  def request: WSRequest = wsUrl(s"/mobile-version-check").addHttpHeaders(acceptJsonHeader, mobileIdHeader)
+  def request: WSRequest = wsUrl(s"/mobile-version-check?journeyId=journeyId").addHttpHeaders(acceptJsonHeader, mobileIdHeader)
 
   "POST /sandbox/mobile-version-check" should {
     "respect the sandbox headers and return true when the UPGRADE-REQUIRED control is specified" in {
