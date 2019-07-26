@@ -44,12 +44,6 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       contentAsJson(result) mustBe parse(upgradeNotRequiredResult)
     }
 
-    "return upgradeRequired false when no journey id is supplied" in {
-      val result = controller.versionCheck(journeyId)(iOSRequestWithValidHeaders)
-      status(result)        mustBe 200
-      contentAsJson(result) mustBe parse(upgradeNotRequiredResult)
-    }
-
     "return upgradeRequired result for android OS" in {
       val result = controller.versionCheck(journeyId)(androidRequestWithAcceptHeader)
       status(result)        mustBe 200
@@ -82,12 +76,6 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       contentAsJson(result) mustBe parse(upgradeNotRequiredResult)
     }
 
-    "return upgradeRequired false when no journey id is supplied" in {
-      val result = controller.versionCheck(journeyId)(iosRequestWithRandomSandboxControlHeader)
-      status(result)        mustBe 200
-      contentAsJson(result) mustBe parse(upgradeNotRequiredResult)
-    }
-
     "return upgradeRequired result for android OS" in {
       val result = controller.versionCheck(journeyId)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
       status(result)        mustBe 200
@@ -115,11 +103,6 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
     val iosRequestWithRandomSandboxControlHeader = iOSRequestWithValidHeaders.withHeaders(sandboxHeader)
 
     "return 500 false when a journey id is supplied" in {
-      val result = controller.versionCheck(journeyId)(iosRequestWithRandomSandboxControlHeader)
-      status(result) mustBe 500
-    }
-
-    "return upgradeRequired false when no journey id is supplied" in {
       val result = controller.versionCheck(journeyId)(iosRequestWithRandomSandboxControlHeader)
       status(result) mustBe 500
     }
