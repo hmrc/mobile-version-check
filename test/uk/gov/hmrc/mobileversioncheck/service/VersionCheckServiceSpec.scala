@@ -60,32 +60,32 @@ class VersionCheckServiceSpec extends BaseSpec {
   "versionCheck" should {
     "audit and not require an upgrade for the configured lower bound version of iOS" in {
       mockAudit(transactionName = "upgradeRequired", Map("os" -> "ios"))
-      service.versionCheck(DeviceVersion(iOS, "3.0.7")).futureValue mustBe false
+      service.versionCheck(DeviceVersion(iOS, "3.0.7"), journeyId).futureValue mustBe false
     }
 
     "audit and not require an upgrade below the configured lower bound version of iOS" in {
       mockAudit(transactionName = "upgradeRequired", Map("os" -> "ios"))
-      service.versionCheck(DeviceVersion(iOS, "3.0.6")).futureValue mustBe true
+      service.versionCheck(DeviceVersion(iOS, "3.0.6"), journeyId).futureValue mustBe true
     }
 
     "audit and not require an upgrade above the configured lower bound version of iOS" in {
       mockAudit(transactionName = "upgradeRequired", Map("os" -> "ios"))
-      service.versionCheck(DeviceVersion(iOS, "3.0.8")).futureValue mustBe false
+      service.versionCheck(DeviceVersion(iOS, "3.0.8"), journeyId).futureValue mustBe false
     }
 
     "audit and not require an upgrade for the configured lower bound version of android" in {
       mockAudit(transactionName = "upgradeRequired", Map("os" -> "android"))
-      service.versionCheck(DeviceVersion(Android, "5.0.22")).futureValue mustBe false
+      service.versionCheck(DeviceVersion(Android, "5.0.22"), journeyId).futureValue mustBe false
     }
 
     "audit and not require an upgrade below the configured lower bound version of android" in {
       mockAudit(transactionName = "upgradeRequired", Map("os" -> "android"))
-      service.versionCheck(DeviceVersion(Android, "5.0.21")).futureValue mustBe true
+      service.versionCheck(DeviceVersion(Android, "5.0.21"), journeyId).futureValue mustBe true
     }
 
     "audit and not require an upgrade above the configured lower bound version of android" in {
       mockAudit(transactionName = "upgradeRequired", Map("os" -> "android"))
-      service.versionCheck(DeviceVersion(Android, "5.0.23")).futureValue mustBe false
+      service.versionCheck(DeviceVersion(Android, "5.0.23"), journeyId).futureValue mustBe false
     }
   }
 

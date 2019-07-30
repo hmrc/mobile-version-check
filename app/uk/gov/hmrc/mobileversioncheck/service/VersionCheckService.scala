@@ -29,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class VersionCheckService @Inject()(val configuration: Configuration, val auditConnector: AuditConnector) extends Auditor {
 
-  def versionCheck(deviceVersion: DeviceVersion, journeyId: Option[String] = None)(
+  def versionCheck(deviceVersion: DeviceVersion, journeyId: String)(
     implicit hc:                  HeaderCarrier,
     ex:                           ExecutionContext): Future[Boolean] =
     withAudit("upgradeRequired", Map("os" -> deviceVersion.os.toString)) {

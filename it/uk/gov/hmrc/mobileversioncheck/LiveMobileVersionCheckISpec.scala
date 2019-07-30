@@ -17,7 +17,7 @@ class LiveMobileVersionCheckISpec extends BaseISpec {
   }
 
   "POST /mobile-version-check" should {
-    def request: WSRequest = wsUrl(s"/mobile-version-check")
+    def request: WSRequest = wsUrl(s"/mobile-version-check?journeyId=journeyId")
 
     "indicate that an upgrade is required for a version below the lower bound version of iOS" in {
       val response = request.addHttpHeaders(acceptJsonHeader).post(toJson(DeviceVersion(iOS, "3.0.6"))).futureValue
