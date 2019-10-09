@@ -16,13 +16,12 @@
 
 package uk.gov.hmrc.mobileversioncheck.domain
 
-import net.ceedubs.ficus.readers.ValueReader
-
-import scala.concurrent.Future
 import com.typesafe.config.Config
 import net.ceedubs.ficus.Ficus._
+import net.ceedubs.ficus.readers.ValueReader
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.{Android, iOS}
 
+import scala.concurrent.Future
 
 case class NativeVersion(ios: VersionRange, android: VersionRange)
 
@@ -30,21 +29,30 @@ trait ValidateAppVersion {
   def config: Config
 
   def upgrade(deviceVersion: DeviceVersion, service: String): Future[Boolean] = {
-    implicit val nativeVersionReader: ValueReader[NativeVersion] = ValueReader.relative { _ =>
 
-      service match {
-        case "RDS" =>       NativeVersion(
-          VersionRange(config.as[String]("approvedAppVersions.rds.ios")),
-          VersionRange(config.as[String]("approvedAppVersions.rds.android"))
-        )
-        case "NGC" => NativeVersion(
-          VersionRange(config.as[String]("approvedAppVersions.ios")),
-          VersionRange(config.as[String]("approvedAppVersions.android"))
-        )
-        case _ => throw IllegalStateException
+    val appVersion: NativeVersion = service match {
+      case "rds" => {
+        implicit val nativeVersionReader: ValueReader[NativeVersion] = ValueReader.relative { _ =>
+          NativeVersion(
+            VersionRange(config.as[String]("approvedAppVersions.rds.ios")),
+            VersionRange(config.as[String]("approvedAppVersions.rds.android"))
+          )
+        }
+        config.as[NativeVersion]("approvedAppVersions.rds")
       }
+
+      case "ngc" => {
+        implicit val nativeVersionReader: ValueReader[NativeVersion] = ValueReader.relative { _ =>
+          NativeVersion(
+            VersionRange(config.as[String]("approvedAppVersions.ngc.ios")),
+            VersionRange(config.as[String]("approvedAppVersions.ngc.android"))
+          )
+        }
+        config.as[NativeVersion]("approvedAppVersions.ngc")
+      }
+
+      case _ => throw new IllegalStateException
     }
-    val appVersion: NativeVersion = config.as[NativeVersion]("approvedAppVersions")
 
     val outsideValidRange = deviceVersion.os match {
       case `iOS`   => !appVersion.ios.includes(Version(deviceVersion.version))

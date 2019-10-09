@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobileversioncheck
+package uk.gov.hmrc.mobileversioncheck.utils
 
-import org.scalamock.scalatest.MockFactory
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.play.PlaySpec
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
-import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.iOS
+import java.nio.charset.StandardCharsets
 
-trait BaseSpec extends PlaySpec with MockFactory with ScalaFutures {
-  implicit lazy val hc: HeaderCarrier = HeaderCarrier()
-  val iOSVersion = DeviceVersion(iOS, "0.1")
-  val journeyId  = "journeyId"
-  val ngcService = "ngc"
-  val rdsService = "rds"
+object Base64 {
+  private val decoder = java.util.Base64.getDecoder
+
+  def decode(encoded: String): String = new String(decoder.decode(encoded), StandardCharsets.UTF_8)
 }

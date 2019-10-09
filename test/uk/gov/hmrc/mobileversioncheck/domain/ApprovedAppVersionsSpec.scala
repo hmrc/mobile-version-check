@@ -22,19 +22,25 @@ import org.scalatest.{Matchers, WordSpecLike}
 
 class ApprovedAppVersionsSpec extends WordSpecLike with Matchers {
 
-  val specConfig: Config = parseString("""approvedAppVersions {
-      |  ios = "[0.0.1,)"
-      |  android = "[0.0.1,)"
-      |}
-      | """.stripMargin)
+  val specConfig: Config = parseString(s"""approvedAppVersions {
+                                          |  ngc {
+                                          |    ios = "[0.0.1,)"
+                                          |    android = "[0.0.1,)"
+                                          |    }
+                                          |  rds {
+                                          |    ios = "[0.0.1,)"
+                                          |    android = "[0.0.1,)"
+                                          |    }
+                                          |}
+                                          | """.stripMargin)
 
-  lazy val approvedAppVersions: ApprovedAppVersions = new ApprovedAppVersions {
+  lazy val approvedAppVersions: ValidateAppVersion = new ValidateAppVersion {
     override lazy val config: Config = specConfig
   }
 
   "ApprovedAppVersions" should {
     "be loaded from config" in {
-      approvedAppVersions.appVersion.ios shouldBe VersionRange("[0.0.1,)")
+      approvedAppVersions.config.getString("approvedAppVersions.ngc.ios") shouldBe "[0.0.1,)"
     }
   }
 }

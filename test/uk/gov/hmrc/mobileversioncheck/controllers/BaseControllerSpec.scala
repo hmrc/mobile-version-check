@@ -20,12 +20,16 @@ import play.api.libs.json.JsValue
 import play.api.libs.json.Json.toJson
 import play.api.test.FakeRequest
 import uk.gov.hmrc.mobileversioncheck.BaseSpec
+import uk.gov.hmrc.mobileversioncheck.domain.{AppState, OPEN}
 
 trait BaseControllerSpec extends BaseSpec {
   val iOSVersionJson:             JsValue              = toJson(iOSVersion)
   val acceptJsonHeader:           (String, String)     = "Accept" -> "application/vnd.hmrc.1.0+json"
   val iOSRequest:                 FakeRequest[JsValue] = FakeRequest().withBody(iOSVersionJson)
   val iOSRequestWithValidHeaders: FakeRequest[JsValue] = FakeRequest().withBody(iOSVersionJson).withHeaders(acceptJsonHeader)
-  val upgradeNotRequiredResult = s"""{"upgradeRequired":false}"""
-  val upgradeRequiredResult    = s"""{"upgradeRequired":true}"""
+  val upgradeNotRequiredResult          = s"""{"upgradeRequired":false,"appState":{"state":"OPEN","message":""}}"""
+  val upgradeRequiredResult             = s"""{"upgradeRequired":true,"appState":{"state":"OPEN","message":""}}"""
+  val upgradeNotRequiredPreliveResult   = s"""{"upgradeRequired":false,"appState":{"state":"PRELIVE","message":""}}"""
+  val upgradeNotRequiredEmergencyResult = s"""{"upgradeRequired":false,"appState":{"state":"EMERGENCY","message":""}}"""
+  val openAppState                      = AppState(OPEN, "")
 }

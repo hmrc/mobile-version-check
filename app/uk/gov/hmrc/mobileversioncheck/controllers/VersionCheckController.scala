@@ -23,7 +23,7 @@ import play.api.libs.json.{JsError, JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.mobileversioncheck.domain.{DeviceVersion, PreFlightCheckResponse}
+import uk.gov.hmrc.mobileversioncheck.domain._
 import uk.gov.hmrc.mobileversioncheck.service.VersionCheckService
 import uk.gov.hmrc.play.bootstrap.controller.{BackendBaseController, BackendController}
 
@@ -32,7 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 trait VersionCheckController extends BackendBaseController with HeaderValidator {
   implicit def executionContext: ExecutionContext
 
-  def versionCheck(journeyId: String): Action[JsValue] =
+  def versionCheck(journeyId: String, service: String): Action[JsValue] =
     validateAccept(acceptHeaderValidationRules).async(controllerComponents.parsers.json) { implicit request =>
       request.body
         .validate[DeviceVersion]
@@ -42,12 +42,14 @@ trait VersionCheckController extends BackendBaseController with HeaderValidator 
             Future.successful(BadRequest(JsError.toJson(errors)))
           },
           deviceVersion => {
-            doVersionCheck(deviceVersion, journeyId)
+            doVersionCheck(deviceVersion, journeyId, service.toLowerCase)
           }
         )
     }
 
-  def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result]
+  def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String, service: String)(
+    implicit hc:                    HeaderCarrier,
+    request:                        Request[_]): Future[Result]
 }
 
 @Singleton
@@ -59,11 +61,14 @@ class LiveVersionCheckController @Inject()(
     with VersionCheckController {
   override def parser: BodyParser[AnyContent] = cc.parsers.anyContent
 
-  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String)(
+  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String, callingService: String)(
     implicit hc:                             HeaderCarrier,
     request:                                 Request[_]): Future[Result] =
-    service.versionCheck(deviceVersion, journeyId).map { upgradeRequired =>
-      Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired)))
+    for {
+      upgradeRequired <- service.versionCheck(deviceVersion, journeyId, callingService)
+      appState        <- service.appState(callingService, deviceVersion)
+    } yield {
+      Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired, appState)))
     }
 }
 
@@ -76,14 +81,16 @@ class SandboxVersionCheckController @Inject()(
     with VersionCheckController {
   override def parser: BodyParser[AnyContent] = cc.parsers.anyContent
 
-  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String)(
+  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String, callingService: String)(
     implicit hc:                             HeaderCarrier,
     request:                                 Request[_]): Future[Result] = {
 
     val result: Result = request.headers.get("SANDBOX-CONTROL") match {
-      case Some("ERROR-500")        => InternalServerError
-      case Some("UPGRADE-REQUIRED") => Ok(Json.toJson(PreFlightCheckResponse(true)))
-      case _                        => Ok(Json.toJson(PreFlightCheckResponse(false)))
+      case Some("ERROR-500")          => InternalServerError
+      case Some("UPGRADE-REQUIRED")   => Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired = true, AppState(OPEN, ""))))
+      case Some("PRELIVE-APPSTATE")   => Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired = false, AppState(PRELIVE, ""))))
+      case Some("EMERGENCY-APPSTATE") => Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired = false, AppState(EMERGENCY, ""))))
+      case _                          => Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired = false, AppState(OPEN, ""))))
     }
 
     Future successful result

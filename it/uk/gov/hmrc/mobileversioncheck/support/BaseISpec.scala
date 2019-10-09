@@ -19,6 +19,9 @@ class BaseISpec
     with WireMockSupport
     with ScalaFutures {
 
+  val ngcService = "ngc"
+  val rdsService = "rds"
+
   override implicit lazy val app: Application = appBuilder.build()
 
   protected val acceptJsonHeader: (String, String) = "Accept" -> "application/vnd.hmrc.1.0+json"
