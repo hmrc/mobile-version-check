@@ -175,8 +175,8 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       }
     }
 
-    s"version check with 'PRELIVE-APPSTATE' SANDBOX-CONTROL header supplied $testName" should {
-      val sandboxHeader                            = sandboxControlHeader -> "PRELIVE-APPSTATE"
+    s"version check with 'INACTIVE-APPSTATE' SANDBOX-CONTROL header supplied $testName" should {
+      val sandboxHeader                            = sandboxControlHeader -> "INACTIVE-APPSTATE"
       val iosRequestWithRandomSandboxControlHeader = iOSRequestWithValidHeaders.withHeaders(sandboxHeader)
 
       s"return upgradeRequired false when a journey id is supplied $testName" in {
@@ -213,8 +213,8 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       }
     }
 
-    s"version check with 'EMERGENCY-APPSTATE' SANDBOX-CONTROL header supplied $testName" should {
-      val sandboxHeader                            = sandboxControlHeader -> "EMERGENCY-APPSTATE"
+    s"version check with 'SHUTTERED-APPSTATE' SANDBOX-CONTROL header supplied $testName" should {
+      val sandboxHeader                            = sandboxControlHeader -> "SHUTTERED-APPSTATE"
       val iosRequestWithRandomSandboxControlHeader = iOSRequestWithValidHeaders.withHeaders(sandboxHeader)
 
       s"return upgradeRequired false when a journey id is supplied $testName" in {

@@ -30,15 +30,15 @@ object NativeOS {
 
   val reads: Reads[NativeOS] = new Reads[NativeOS] {
     override def reads(json: JsValue): JsResult[NativeOS] = json match {
-      case JsString("ios") => JsSuccess(iOS)
+      case JsString("ios")     => JsSuccess(iOS)
       case JsString("android") => JsSuccess(Android)
-      case _ => JsError("unknown os")
+      case _                   => JsError("unknown os")
     }
   }
 
   val writes: Writes[NativeOS] = new Writes[NativeOS] {
     override def writes(os: NativeOS): JsString = os match {
-      case `iOS` => JsString("ios")
+      case `iOS`   => JsString("ios")
       case Android => JsString("android")
     }
   }

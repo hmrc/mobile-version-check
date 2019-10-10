@@ -20,25 +20,25 @@ import play.api.libs.json._
 
 sealed trait State { val value: String }
 
-case object OPEN extends State { val value      = "OPEN" }
-case object PRELIVE extends State { val value   = "PRELIVE" }
-case object EMERGENCY extends State { val value = "EMERGENCY" }
+case object ACTIVE extends State { val value    = "ACTIVE" }
+case object INACTIVE extends State { val value  = "INACTIVE" }
+case object SHUTTERED extends State { val value = "SHUTTERED" }
 
 object State {
   val reads: Reads[State] = new Reads[State] {
     override def reads(json: JsValue): JsResult[State] = json.toString().toUpperCase match {
-      case "OPEN"      => JsSuccess(OPEN)
-      case "PRELIVE"   => JsSuccess(PRELIVE)
-      case "EMERGENCY" => JsSuccess(EMERGENCY)
+      case "ACTIVE"    => JsSuccess(ACTIVE)
+      case "INACTIVE"  => JsSuccess(INACTIVE)
+      case "SHUTTERED" => JsSuccess(SHUTTERED)
       case _           => JsError("unknown state")
     }
   }
 
   val writes: Writes[State] = new Writes[State] {
     override def writes(state: State): JsString = state match {
-      case OPEN      => JsString("OPEN")
-      case EMERGENCY => JsString("EMERGENCY")
-      case PRELIVE   => JsString("PRELIVE")
+      case ACTIVE    => JsString("ACTIVE")
+      case SHUTTERED => JsString("SHUTTERED")
+      case INACTIVE  => JsString("INACTIVE")
     }
   }
 

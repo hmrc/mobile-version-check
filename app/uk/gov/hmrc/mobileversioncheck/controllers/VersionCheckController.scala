@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.mobileversioncheck.controllers
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 import com.google.inject.Singleton
 import javax.inject.Inject
 import play.api.Logger
@@ -86,11 +89,35 @@ class SandboxVersionCheckController @Inject()(
     request:                                 Request[_]): Future[Result] = {
 
     val result: Result = request.headers.get("SANDBOX-CONTROL") match {
-      case Some("ERROR-500")          => InternalServerError
-      case Some("UPGRADE-REQUIRED")   => Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired = true, AppState(OPEN, ""))))
-      case Some("PRELIVE-APPSTATE")   => Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired = false, AppState(PRELIVE, ""))))
-      case Some("EMERGENCY-APPSTATE") => Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired = false, AppState(EMERGENCY, ""))))
-      case _                          => Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired = false, AppState(OPEN, ""))))
+      case Some("ERROR-500") => InternalServerError
+      case Some("UPGRADE-REQUIRED") =>
+        Ok(
+          Json.toJson(
+            PreFlightCheckResponse(
+              upgradeRequired = true,
+              AppState(ACTIVE, None)
+            )))
+      case Some("INACTIVE-APPSTATE") =>
+        Ok(
+          Json.toJson(
+            PreFlightCheckResponse(
+              upgradeRequired = false,
+              AppState(INACTIVE, Some(LocalDateTime.parse("2019-11-01T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+            )))
+      case Some("SHUTTERED-APPSTATE") =>
+        Ok(
+          Json.toJson(
+            PreFlightCheckResponse(
+              upgradeRequired = false,
+              AppState(SHUTTERED, Some(LocalDateTime.parse("2020-01-01T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+            )))
+      case _ =>
+        Ok(
+          Json.toJson(
+            PreFlightCheckResponse(
+              upgradeRequired = false,
+              AppState(ACTIVE, None)
+            )))
     }
 
     Future successful result

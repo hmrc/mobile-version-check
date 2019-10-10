@@ -16,20 +16,23 @@
 
 package uk.gov.hmrc.mobileversioncheck.controllers
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json.toJson
 import play.api.test.FakeRequest
 import uk.gov.hmrc.mobileversioncheck.BaseSpec
-import uk.gov.hmrc.mobileversioncheck.domain.{AppState, OPEN}
+import uk.gov.hmrc.mobileversioncheck.domain.{ACTIVE, AppState}
 
 trait BaseControllerSpec extends BaseSpec {
   val iOSVersionJson:             JsValue              = toJson(iOSVersion)
   val acceptJsonHeader:           (String, String)     = "Accept" -> "application/vnd.hmrc.1.0+json"
   val iOSRequest:                 FakeRequest[JsValue] = FakeRequest().withBody(iOSVersionJson)
   val iOSRequestWithValidHeaders: FakeRequest[JsValue] = FakeRequest().withBody(iOSVersionJson).withHeaders(acceptJsonHeader)
-  val upgradeNotRequiredResult          = s"""{"upgradeRequired":false,"appState":{"state":"OPEN","message":""}}"""
-  val upgradeRequiredResult             = s"""{"upgradeRequired":true,"appState":{"state":"OPEN","message":""}}"""
-  val upgradeNotRequiredPreliveResult   = s"""{"upgradeRequired":false,"appState":{"state":"PRELIVE","message":""}}"""
-  val upgradeNotRequiredEmergencyResult = s"""{"upgradeRequired":false,"appState":{"state":"EMERGENCY","message":""}}"""
-  val openAppState                      = AppState(OPEN, "")
+  val upgradeNotRequiredResult          = s"""{"upgradeRequired":false,"appState":{"state":"ACTIVE"}}"""
+  val upgradeRequiredResult             = s"""{"upgradeRequired":true,"appState":{"state":"ACTIVE"}}"""
+  val upgradeNotRequiredPreliveResult   = s"""{"upgradeRequired":false,"appState":{"state":"INACTIVE","endDate":"2019-11-01T00:00:00"}}"""
+  val upgradeNotRequiredEmergencyResult = s"""{"upgradeRequired":false,"appState":{"state":"SHUTTERED","endDate":"2020-01-01T00:00:00"}}"""
+  val openAppState                      = AppState(ACTIVE, None)
 }

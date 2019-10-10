@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.mobileversioncheck.service
 
-import com.google.common.base.Charsets
-import com.google.common.io.BaseEncoding
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+
 import org.scalamock.handlers.CallHandler3
 import org.scalamock.matchers.MatcherBase
 import org.scalatest.prop.TableDrivenPropertyChecks.forAll
@@ -68,14 +69,11 @@ class VersionCheckServiceSpec extends BaseSpec {
       .returns(Some(state.value))
       .anyNumberOfTimes()
 
-  def mockAppStateMessage(message: String) =
+  def mockAppStateMessage(endDate: String) =
     (appNameConfiguration
       .get[String](_: String)(_: ConfigLoader[String]))
       .expects(*, *)
-      .returns(
-        BaseEncoding
-          .base64()
-          .encode(message.getBytes(Charsets.UTF_8)))
+      .returns(endDate)
       .anyNumberOfTimes()
 
   private def alterDeviceVersion(lowestAcceptedVersion: String, valueChange: Int): String = {
@@ -125,60 +123,55 @@ class VersionCheckServiceSpec extends BaseSpec {
         .versionCheck(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, 1)), journeyId, callingService)
         .futureValue mustBe false
     }
-    s"return PRELIVE app state when set in config $testName" in {
-      (appNameConfiguration.getOptional[String](_: String)(_: ConfigLoader[String])).expects(*, *).returns(Some(PRELIVE.value)).anyNumberOfTimes()
-      (appNameConfiguration
-        .get[String](_: String)(_: ConfigLoader[String]))
-        .expects(*, *)
-        .returns(BaseEncoding.base64().encode("Message".getBytes(Charsets.UTF_8)))
-        .anyNumberOfTimes()
-      (auditConnector
-        .sendEvent(_: DataEvent)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(*, *, *)
-        .returns(Future successful (AuditResult.Success))
-      service.appState(callingService, DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, 1))).futureValue mustBe AppState(
-        PRELIVE,
-        "Message")
-    }
   }
 
   forAll(scenarios) { (testName: String, callingService: String, lowestAcceptedIosVersion: String, lowestAcceptedAndroidVersion: String) =>
     s"appState" should {
-      s"return PRELIVE app state when set in config $testName on Android" in {
+      val expectedInactiveEndDate  = LocalDateTime.of(2019, 11, 1, 0, 0, 0).truncatedTo(ChronoUnit.SECONDS)
+      val expectedShutteredEndDate = LocalDateTime.of(2020, 1, 1, 0, 0, 0).truncatedTo(ChronoUnit.SECONDS)
+      s"return INACTIVE app state when set in config $testName on Android" in {
         (auditConnector
           .sendEvent(_: DataEvent)(_: HeaderCarrier, _: ExecutionContext))
           .expects(*, *, *)
           .returns(Future successful (AuditResult.Success))
-        mockAppStateMessage("Message")
-        mockAppState(PRELIVE)
-        service.appState(callingService, DeviceVersion(Android, lowestAcceptedAndroidVersion)).futureValue mustBe AppState(PRELIVE, "Message")
+        mockAppStateMessage("2019-11-01T00:00:00")
+        mockAppState(INACTIVE)
+        service.appState(callingService, DeviceVersion(Android, lowestAcceptedAndroidVersion)).futureValue mustBe AppState(
+          INACTIVE,
+          Some(expectedInactiveEndDate))
       }
-      s"return PRELIVE app state when set in config $testName on ios" in {
+      s"return INACTIVE app state when set in config $testName on ios" in {
         (auditConnector
           .sendEvent(_: DataEvent)(_: HeaderCarrier, _: ExecutionContext))
           .expects(*, *, *)
           .returns(Future successful (AuditResult.Success))
-        mockAppStateMessage("Message")
-        mockAppState(PRELIVE)
-        service.appState(callingService, DeviceVersion(Android, lowestAcceptedIosVersion)).futureValue mustBe AppState(PRELIVE, "Message")
+        mockAppStateMessage("2019-11-01T00:00:00")
+        mockAppState(INACTIVE)
+        service.appState(callingService, DeviceVersion(Android, lowestAcceptedIosVersion)).futureValue mustBe AppState(
+          INACTIVE,
+          Some(expectedInactiveEndDate))
       }
-      s"return EMERGENCY app state when set in config $testName on Android" in {
+      s"return SHUTTERED app state when set in config $testName on Android" in {
         (auditConnector
           .sendEvent(_: DataEvent)(_: HeaderCarrier, _: ExecutionContext))
           .expects(*, *, *)
           .returns(Future successful (AuditResult.Success))
-        mockAppStateMessage("Message")
-        mockAppState(EMERGENCY)
-        service.appState(callingService, DeviceVersion(Android, lowestAcceptedAndroidVersion)).futureValue mustBe AppState(EMERGENCY, "Message")
+        mockAppStateMessage("2020-01-01T00:00:00")
+        mockAppState(SHUTTERED)
+        service.appState(callingService, DeviceVersion(Android, lowestAcceptedAndroidVersion)).futureValue mustBe AppState(
+          SHUTTERED,
+          Some(expectedShutteredEndDate))
       }
-      s"return EMERGENCY app state when set in config $testName on ios" in {
+      s"return SHUTTERED app state when set in config $testName on ios" in {
         (auditConnector
           .sendEvent(_: DataEvent)(_: HeaderCarrier, _: ExecutionContext))
           .expects(*, *, *)
           .returns(Future successful (AuditResult.Success))
-        mockAppStateMessage("Message")
-        mockAppState(EMERGENCY)
-        service.appState(callingService, DeviceVersion(Android, lowestAcceptedIosVersion)).futureValue mustBe AppState(EMERGENCY, "Message")
+        mockAppStateMessage("2020-01-01T00:00:00")
+        mockAppState(SHUTTERED)
+        service.appState(callingService, DeviceVersion(Android, lowestAcceptedIosVersion)).futureValue mustBe AppState(
+          SHUTTERED,
+          Some(expectedShutteredEndDate))
       }
     }
   }

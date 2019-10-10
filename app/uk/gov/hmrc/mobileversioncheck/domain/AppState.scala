@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.mobileversioncheck.domain
 
+import java.time.LocalDateTime
+
 import play.api.libs.json.Json.format
 import play.api.libs.json.OFormat
 
-case class AppState(state: State, message: String)
+case class AppState(state: State, endDate: Option[LocalDateTime])
 object AppState {
   implicit val appState: OFormat[AppState] = {
     format[AppState]

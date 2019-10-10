@@ -28,7 +28,7 @@ class SandboxMobileVersionCheckISpec extends BaseISpec {
 
         response.status                                   shouldBe 200
         (response.json \ "upgradeRequired").as[Boolean]   shouldBe true
-        (response.json \ "appState" \ "state").as[String] shouldBe "OPEN"
+        (response.json \ "appState" \ "state").as[String] shouldBe "ACTIVE"
       }
 
       s"respect the sandbox headers and return false when no control is specified $testName" in {
@@ -43,19 +43,19 @@ class SandboxMobileVersionCheckISpec extends BaseISpec {
 
         response.status shouldBe 500
       }
-      s"respect the sandbox headers and return correct appState when the PRELIVE-APPSTATE control is specified $testName" in {
+      s"respect the sandbox headers and return correct appState when the INACTIVE-APPSTATE control is specified $testName" in {
         val response =
-          request(callingService).addHttpHeaders("SANDBOX-CONTROL" -> "PRELIVE-APPSTATE").post(toJson(DeviceVersion(iOS, "3.0.8"))).futureValue
+          request(callingService).addHttpHeaders("SANDBOX-CONTROL" -> "INACTIVE-APPSTATE").post(toJson(DeviceVersion(iOS, "3.0.8"))).futureValue
 
         response.status                                   shouldBe 200
-        (response.json \ "appState" \ "state").as[String] shouldBe "PRELIVE"
+        (response.json \ "appState" \ "state").as[String] shouldBe "INACTIVE"
       }
-      s"respect the sandbox headers and return correct appState when the EMERGENCY-APPSTATE control is specified $testName" in {
+      s"respect the sandbox headers and return correct appState when the SHUTTERED-APPSTATE control is specified $testName" in {
         val response =
-          request(callingService).addHttpHeaders("SANDBOX-CONTROL" -> "EMERGENCY-APPSTATE").post(toJson(DeviceVersion(iOS, "3.0.8"))).futureValue
+          request(callingService).addHttpHeaders("SANDBOX-CONTROL" -> "SHUTTERED-APPSTATE").post(toJson(DeviceVersion(iOS, "3.0.8"))).futureValue
 
         response.status                                   shouldBe 200
-        (response.json \ "appState" \ "state").as[String] shouldBe "EMERGENCY"
+        (response.json \ "appState" \ "state").as[String] shouldBe "SHUTTERED"
       }
     }
   }
