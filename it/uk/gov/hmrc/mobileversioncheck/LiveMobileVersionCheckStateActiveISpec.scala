@@ -5,10 +5,12 @@ import org.scalatest.prop.Tables.Table
 import play.api.libs.json.Json.toJson
 import play.api.libs.ws.WSRequest
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.{Android, iOS}
-import uk.gov.hmrc.mobileversioncheck.domain.{DeviceVersion, Version}
+import uk.gov.hmrc.mobileversioncheck.domain._
 import uk.gov.hmrc.mobileversioncheck.support.BaseISpec
 
-class LiveMobileVersionCheckISpec extends BaseISpec {
+class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
+  override def state: State = ACTIVE
+
   "GET /ping/ping" should {
     def request: WSRequest = wsUrl(s"/ping/ping").addHttpHeaders(acceptJsonHeader)
 
@@ -38,6 +40,7 @@ class LiveMobileVersionCheckISpec extends BaseISpec {
 
         response.status                                 shouldBe 200
         (response.json \ "upgradeRequired").as[Boolean] shouldBe true
+        (response.json \ "appState").asOpt[AppState]    shouldBe getExpectedResponse(Some(AppState(ACTIVE, None)), callingService)
       }
 
       s"indicate that an upgrade is not required for a version equal to the lower bound version of iOS $testName" in {
@@ -45,6 +48,7 @@ class LiveMobileVersionCheckISpec extends BaseISpec {
 
         response.status                                 shouldBe 200
         (response.json \ "upgradeRequired").as[Boolean] shouldBe false
+        (response.json \ "appState").asOpt[AppState]    shouldBe getExpectedResponse(Some(AppState(ACTIVE, None)), callingService)
       }
 
       s"indicate that an upgrade is not required for a version above the lower bound version of iOS $testName" in {
@@ -53,6 +57,7 @@ class LiveMobileVersionCheckISpec extends BaseISpec {
 
         response.status                                 shouldBe 200
         (response.json \ "upgradeRequired").as[Boolean] shouldBe false
+        (response.json \ "appState").asOpt[AppState]    shouldBe getExpectedResponse(Some(AppState(ACTIVE, None)), callingService)
       }
 
       s"indicate that an upgrade is required for a version below the lower bound version of android $testName" in {
@@ -63,6 +68,7 @@ class LiveMobileVersionCheckISpec extends BaseISpec {
 
         response.status                                 shouldBe 200
         (response.json \ "upgradeRequired").as[Boolean] shouldBe true
+        (response.json \ "appState").asOpt[AppState]    shouldBe getExpectedResponse(Some(AppState(ACTIVE, None)), callingService)
       }
 
       s"indicate that an upgrade is not required for a version equal to the lower bound version of android $testName" in {
@@ -70,6 +76,7 @@ class LiveMobileVersionCheckISpec extends BaseISpec {
 
         response.status                                 shouldBe 200
         (response.json \ "upgradeRequired").as[Boolean] shouldBe false
+        (response.json \ "appState").asOpt[AppState]    shouldBe getExpectedResponse(Some(AppState(ACTIVE, None)), callingService)
       }
 
       s"indicate that an upgrade is not required for a version above the lower bound version of android $testName" in {
@@ -80,6 +87,7 @@ class LiveMobileVersionCheckISpec extends BaseISpec {
 
         response.status                                 shouldBe 200
         (response.json \ "upgradeRequired").as[Boolean] shouldBe false
+        (response.json \ "appState").asOpt[AppState]    shouldBe getExpectedResponse(Some(AppState(ACTIVE, None)), callingService)
       }
     }
   }

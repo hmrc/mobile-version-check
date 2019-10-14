@@ -4,7 +4,7 @@ import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import org.scalatest.prop.Tables.Table
 import play.api.libs.json.Json.toJson
 import play.api.libs.ws.WSRequest
-import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
+import uk.gov.hmrc.mobileversioncheck.domain.{AppState, DeviceVersion}
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.iOS
 import uk.gov.hmrc.mobileversioncheck.support.BaseISpec
 
@@ -26,9 +26,16 @@ class SandboxMobileVersionCheckISpec extends BaseISpec {
         val response =
           request(callingService).addHttpHeaders("SANDBOX-CONTROL" -> "UPGRADE-REQUIRED").post(toJson(DeviceVersion(iOS, "3.0.8"))).futureValue
 
-        response.status                                   shouldBe 200
-        (response.json \ "upgradeRequired").as[Boolean]   shouldBe true
-        (response.json \ "appState" \ "state").as[String] shouldBe "ACTIVE"
+
+        if(callingService == "ngc"){
+          response.status                                   shouldBe 200
+          (response.json \ "upgradeRequired").as[Boolean]   shouldBe true
+          (response.json \ "appState").asOpt[AppState] shouldBe None
+        }else{
+          response.status                                   shouldBe 200
+          (response.json \ "upgradeRequired").as[Boolean]   shouldBe true
+          (response.json \ "appState" \ "state").as[String] shouldBe "ACTIVE"
+        }
       }
 
       s"respect the sandbox headers and return false when no control is specified $testName" in {
@@ -47,15 +54,23 @@ class SandboxMobileVersionCheckISpec extends BaseISpec {
         val response =
           request(callingService).addHttpHeaders("SANDBOX-CONTROL" -> "INACTIVE-APPSTATE").post(toJson(DeviceVersion(iOS, "3.0.8"))).futureValue
 
-        response.status                                   shouldBe 200
-        (response.json \ "appState" \ "state").as[String] shouldBe "INACTIVE"
+        if(callingService == "ngc"){
+          response.status                                   shouldBe 500
+        } else{
+          response.status                                   shouldBe 200
+          (response.json \ "appState" \ "state").as[String] shouldBe "INACTIVE"
+        }
       }
       s"respect the sandbox headers and return correct appState when the SHUTTERED-APPSTATE control is specified $testName" in {
         val response =
           request(callingService).addHttpHeaders("SANDBOX-CONTROL" -> "SHUTTERED-APPSTATE").post(toJson(DeviceVersion(iOS, "3.0.8"))).futureValue
 
-        response.status                                   shouldBe 200
-        (response.json \ "appState" \ "state").as[String] shouldBe "SHUTTERED"
+        if(callingService == "ngc"){
+          response.status                                   shouldBe 500
+        } else{
+          response.status                                   shouldBe 200
+          (response.json \ "appState" \ "state").as[String] shouldBe "SHUTTERED"
+        }
       }
     }
   }

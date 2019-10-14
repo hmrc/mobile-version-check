@@ -88,35 +88,42 @@ class SandboxVersionCheckController @Inject()(
     implicit hc:                             HeaderCarrier,
     request:                                 Request[_]): Future[Result] = {
 
-    val result: Result = request.headers.get("SANDBOX-CONTROL") match {
-      case Some("ERROR-500") => InternalServerError
-      case Some("UPGRADE-REQUIRED") =>
+    val result: Result = (callingService, request.headers.get("SANDBOX-CONTROL")) match {
+      case (_, Some("ERROR-500")) => InternalServerError
+      case ("rds", Some("UPGRADE-REQUIRED")) =>
         Ok(
           Json.toJson(
             PreFlightCheckResponse(
               upgradeRequired = true,
-              AppState(ACTIVE, None)
+              Some(AppState(ACTIVE, None))
             )))
-      case Some("INACTIVE-APPSTATE") =>
+      case (_, Some("UPGRADE-REQUIRED")) =>
+        Ok(
+          Json.toJson(
+            PreFlightCheckResponse(upgradeRequired = true, None)
+          ))
+      case ("rds", Some("INACTIVE-APPSTATE")) =>
         Ok(
           Json.toJson(
             PreFlightCheckResponse(
               upgradeRequired = false,
-              AppState(INACTIVE, Some(LocalDateTime.parse("2019-11-01T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+              Some(AppState(INACTIVE, Some(LocalDateTime.parse("2019-11-01T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME))))
             )))
-      case Some("SHUTTERED-APPSTATE") =>
+      case ("ngc", Some("INACTIVE-APPSTATE"))  => InternalServerError
+      case ("ngc", Some("SHUTTERED-APPSTATE")) => InternalServerError
+      case ("rds", Some("SHUTTERED-APPSTATE")) =>
         Ok(
           Json.toJson(
             PreFlightCheckResponse(
               upgradeRequired = false,
-              AppState(SHUTTERED, Some(LocalDateTime.parse("2020-01-01T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+              Some(AppState(SHUTTERED, Some(LocalDateTime.parse("2020-01-01T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME))))
             )))
       case _ =>
         Ok(
           Json.toJson(
             PreFlightCheckResponse(
               upgradeRequired = false,
-              AppState(ACTIVE, None)
+              Some(AppState(ACTIVE, None))
             )))
     }
 

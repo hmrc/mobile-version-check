@@ -43,6 +43,14 @@ class VersionCheckServiceSpec extends BaseSpec {
 
   val service = new VersionCheckService(appNameConfiguration, auditConnector)
 
+  def overrideAppStateIfNgc(appState: Option[AppState], service: String) : Option[AppState] = {
+      service match{
+        case "rds" => appState
+        case "ngc" => None
+        case e => throw new RuntimeException(s"$e is an invalid state for the tests")
+      }
+  }
+
   def mockAudit(
     transactionName: String,
     detail:          Map[String, String] = Map.empty): CallHandler3[DataEvent, HeaderCarrier, ExecutionContext, Future[AuditResult]] = {
@@ -136,9 +144,9 @@ class VersionCheckServiceSpec extends BaseSpec {
           .returns(Future successful (AuditResult.Success))
         mockAppStateMessage("2019-11-01T00:00:00")
         mockAppState(INACTIVE)
-        service.appState(callingService, DeviceVersion(Android, lowestAcceptedAndroidVersion)).futureValue mustBe AppState(
+        service.appState(callingService, DeviceVersion(Android, lowestAcceptedAndroidVersion)).futureValue mustBe overrideAppStateIfNgc(Some(AppState(
           INACTIVE,
-          Some(expectedInactiveEndDate))
+          Some(expectedInactiveEndDate))), callingService)
       }
       s"return INACTIVE app state when set in config $testName on ios" in {
         (auditConnector
@@ -147,9 +155,9 @@ class VersionCheckServiceSpec extends BaseSpec {
           .returns(Future successful (AuditResult.Success))
         mockAppStateMessage("2019-11-01T00:00:00")
         mockAppState(INACTIVE)
-        service.appState(callingService, DeviceVersion(Android, lowestAcceptedIosVersion)).futureValue mustBe AppState(
+        service.appState(callingService, DeviceVersion(Android, lowestAcceptedIosVersion)).futureValue mustBe overrideAppStateIfNgc(Some(AppState(
           INACTIVE,
-          Some(expectedInactiveEndDate))
+          Some(expectedInactiveEndDate))),callingService)
       }
       s"return SHUTTERED app state when set in config $testName on Android" in {
         (auditConnector
@@ -158,9 +166,9 @@ class VersionCheckServiceSpec extends BaseSpec {
           .returns(Future successful (AuditResult.Success))
         mockAppStateMessage("2020-01-01T00:00:00")
         mockAppState(SHUTTERED)
-        service.appState(callingService, DeviceVersion(Android, lowestAcceptedAndroidVersion)).futureValue mustBe AppState(
+        service.appState(callingService, DeviceVersion(Android, lowestAcceptedAndroidVersion)).futureValue mustBe overrideAppStateIfNgc(Some(AppState(
           SHUTTERED,
-          Some(expectedShutteredEndDate))
+          Some(expectedShutteredEndDate))), callingService)
       }
       s"return SHUTTERED app state when set in config $testName on ios" in {
         (auditConnector
@@ -169,9 +177,9 @@ class VersionCheckServiceSpec extends BaseSpec {
           .returns(Future successful (AuditResult.Success))
         mockAppStateMessage("2020-01-01T00:00:00")
         mockAppState(SHUTTERED)
-        service.appState(callingService, DeviceVersion(Android, lowestAcceptedIosVersion)).futureValue mustBe AppState(
+        service.appState(callingService, DeviceVersion(Android, lowestAcceptedIosVersion)).futureValue mustBe overrideAppStateIfNgc(Some(AppState(
           SHUTTERED,
-          Some(expectedShutteredEndDate))
+          Some(expectedShutteredEndDate))), callingService)
       }
     }
   }

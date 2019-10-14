@@ -18,7 +18,6 @@ package uk.gov.hmrc.mobileversioncheck.service
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
@@ -53,13 +52,18 @@ class VersionCheckService @Inject()(val configuration: Configuration, val auditC
     if (dateString.isEmpty) None else Some(LocalDateTime.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME))
   }
 
-  def appState(service: String, deviceVersion: DeviceVersion)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[AppState] =
+  def appState(service: String, deviceVersion: DeviceVersion)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Option[AppState]] =
     withAudit("appState", Map("os" -> deviceVersion.os.toString)) {
-      Future.successful(
-        AppState(
-          state   = configState(s"$service.state"),
-          endDate = configEndDate(s"$service.endDate")
-        ))
+      service match {
+        case "rds" =>
+          Future.successful(
+            Some(
+              AppState(
+                state   = configState(s"$service.state"),
+                endDate = configEndDate(s"$service.endDate")
+              )))
+        case _ => Future.successful(None)
+      }
 
     }
 

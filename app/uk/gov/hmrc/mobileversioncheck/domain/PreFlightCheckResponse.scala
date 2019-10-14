@@ -19,7 +19,7 @@ package uk.gov.hmrc.mobileversioncheck.domain
 import play.api.libs.json.Json.format
 import play.api.libs.json.OFormat
 
-case class PreFlightCheckResponse(upgradeRequired: Boolean, appState: AppState)
+case class PreFlightCheckResponse(upgradeRequired: Boolean, appState: Option[AppState])
 
 object PreFlightCheckResponse {
   implicit val preFlightCheckResponseFmt: OFormat[PreFlightCheckResponse] = {

@@ -26,7 +26,7 @@ case object SHUTTERED extends State { val value = "SHUTTERED" }
 
 object State {
   val reads: Reads[State] = new Reads[State] {
-    override def reads(json: JsValue): JsResult[State] = json.toString().toUpperCase match {
+    override def reads(json: JsValue): JsResult[State] = json.as[String].toUpperCase match {
       case "ACTIVE"    => JsSuccess(ACTIVE)
       case "INACTIVE"  => JsSuccess(INACTIVE)
       case "SHUTTERED" => JsSuccess(SHUTTERED)
