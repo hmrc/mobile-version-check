@@ -16,7 +16,7 @@ The upgrade status is determined using the supplied POST data.
 
     `service=rds`
     
-    This is the app that is calling it and this will results in the return of app state as NGC does not need this feature
+    This is the app that is calling it and this will result in the return of app state as NGC does not need this feature
  
    `journeyId=[journeyId]`
    
