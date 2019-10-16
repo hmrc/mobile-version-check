@@ -6,15 +6,13 @@ The upgrade status is determined using the supplied POST data.
   
 * **URL**
 
-  `/mobile-version-check/version-check`
+  `/mobile-version-check`
 
 * **Method:**
   
   `POST`
 
 *  **URL Params**
-
-   **Optional:**
  
    `journeyId=[journeyId]`
    

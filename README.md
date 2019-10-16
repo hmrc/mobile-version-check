@@ -13,7 +13,8 @@ The service exposes the following end point:
 
 | *Task* | *Supported Methods* | *Description* |
 |--------|----|----|
-| ```/mobile-version-check``` | POST | Validates the mobile application version [More...](docs/version-check.md) |
+| ```/mobile-version-check``` | POST | Validates the mobile application version [More (NGC)...](docs/version-check.md) |
+| ```/mobile-version-check?service=rds``` | POST | Validates the mobile application version [More (RDS)...](docs/version-check-rds.md) |
 
 
 # Sandbox
@@ -32,6 +33,13 @@ To test different scenarios, add a header "SANDBOX-CONTROL" with one of the foll
 | "UPGRADE-REQUIRED" | Happy path, returns a json payload with upgradeRequired == true |
 | "ERROR-500" | Unhappy path, trigger a 500 Internal Server Error response |
 | Not set or any other value | Happy path, returns a json payload with upgradeRequired == false |
+
+#### For RDS only
+| *Value* | *Description* |
+|--------|----|
+| "UPGRADE-REQUIRED" | Happy path, returns a json payload with upgradeRequired == true and also the state as ACTIVE |
+| "INACTIVE-APPSTATE" | The App is in a pre-brexit state with an endDate set |
+| "SHUTTERED-APPSTATE" | The App is in a shuttered state with an endDate set |
 
 To start the service locally either use service-manager or clone this repo and use sbt to start:
 ```
