@@ -18,37 +18,53 @@ package uk.gov.hmrc.mobileversioncheck.domain
 
 import com.typesafe.config.{Config, ConfigFactory}
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.prop.TableDrivenPropertyChecks.forAll
+import org.scalatest.prop.Tables.Table
 import org.scalatestplus.play.PlaySpec
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.{Android, iOS}
 
 class ValidateAppVersionSpec extends PlaySpec with ScalaFutures {
 
+  val ngcService = "ngc"
+  val rdsService = "rds"
+
   def validateAppVersion(iosVersionRange: String = "[0.0.1,)", androidVersionRange: String = "[0.0.1,)"): ValidateAppVersion =
     new ValidateAppVersion {
       override lazy val config: Config = ConfigFactory.parseString(s"""approvedAppVersions {
-         |  ios = "$iosVersionRange"
-         |  android = "$androidVersionRange"
+         |  ngc {
+         |    ios = "$iosVersionRange"
+         |    android = "$androidVersionRange"
+         |    }
+         |  rds {
+         |    ios = "$iosVersionRange"
+         |    android = "$androidVersionRange"
+         |    }
          |}
          | """.stripMargin)
     }
 
-  "Validating app version" should {
-    "app version 1.2.0 valid" in {
-      val deviceVersion = DeviceVersion(iOS, "1.2.0")
-      validateAppVersion().upgrade(deviceVersion).futureValue mustBe false
-    }
-    "app version 1.3.0 valid" in {
-      val deviceVersion = DeviceVersion(Android, "1.3.0")
-      validateAppVersion("[1.3.0,)").upgrade(deviceVersion).futureValue mustBe false
-    }
+  val scenarios = Table(
+    ("testName", "callingService"),
+    ("As NGC Service", ngcService),
+    ("As RDS Service", rdsService)
+  )
 
-    "upgrade required for iOS app version 1.0.0 valid" in {
-      val deviceVersion = DeviceVersion(iOS, "1.0.0")
-      validateAppVersion("[1.2.0,1.3.0]").upgrade(deviceVersion).futureValue mustBe true
+  forAll(scenarios) { (testName: String, callingService: String) =>
+    s"app version 1.2.0 valid $testName" in {
+      val deviceVersion = DeviceVersion(iOS, "1.2.0")
+      validateAppVersion().upgrade(deviceVersion, callingService).futureValue mustBe false
     }
-    "upgrade required for Android app version 1.0.0 valid" in {
+    s"app version 1.3.0 valid $testName" in {
+      val deviceVersion = DeviceVersion(Android, "1.3.0")
+      validateAppVersion("[1.3.0,)").upgrade(deviceVersion, callingService).futureValue mustBe false
+    }
+    s"upgrade required for iOS app version 1.0.0 valid $testName" in {
+      val deviceVersion = DeviceVersion(iOS, "1.0.0")
+      validateAppVersion("[1.2.0,1.3.0]").upgrade(deviceVersion, callingService).futureValue mustBe true
+    }
+    s"upgrade required for Android app version 1.0.0 valid $testName" in {
       val deviceVersion = DeviceVersion(Android, "1.0.0")
-      validateAppVersion(androidVersionRange = "[1.2.0,1.3.0]").upgrade(deviceVersion).futureValue mustBe true
+      validateAppVersion(androidVersionRange = "[1.2.0,1.3.0]").upgrade(deviceVersion, callingService).futureValue mustBe true
     }
   }
 }

@@ -16,10 +16,13 @@
 
 package uk.gov.hmrc.mobileversioncheck.service
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.mobileversioncheck.domain.{DeviceVersion, ValidateAppVersion}
+import uk.gov.hmrc.mobileversioncheck.domain._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.config.AppName
 import uk.gov.hmrc.service.Auditor
@@ -29,11 +32,39 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class VersionCheckService @Inject()(val configuration: Configuration, val auditConnector: AuditConnector) extends Auditor {
 
-  def versionCheck(deviceVersion: DeviceVersion, journeyId: String)(
+  def versionCheck(deviceVersion: DeviceVersion, journeyId: String, service: String)(
     implicit hc:                  HeaderCarrier,
     ex:                           ExecutionContext): Future[Boolean] =
     withAudit("upgradeRequired", Map("os" -> deviceVersion.os.toString)) {
-      ValidateAppVersion.upgrade(deviceVersion)
+      ValidateAppVersion.upgrade(deviceVersion, service)
+    }
+
+  private def configState(path: String): State =
+    configuration.getOptional[String](path) match {
+      case Some(ACTIVE.value)    => ACTIVE
+      case Some(INACTIVE.value)  => INACTIVE
+      case Some(SHUTTERED.value) => SHUTTERED
+      case _                     => throw new IllegalStateException("Invalid State in config")
+    }
+
+  private def configEndDate(path: String): Option[LocalDateTime] = {
+    val dateString = configuration.get[String](path)
+    if (dateString.isEmpty) None else Some(LocalDateTime.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+  }
+
+  def appState(service: String, deviceVersion: DeviceVersion)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Option[AppState]] =
+    withAudit("appState", Map("os" -> deviceVersion.os.toString)) {
+      service match {
+        case "rds" =>
+          Future.successful(
+            Some(
+              AppState(
+                state   = configState(s"$service.state"),
+                endDate = configEndDate(s"$service.endDate")
+              )))
+        case _ => Future.successful(None)
+      }
+
     }
 
   override def appName: String = AppName.fromConfiguration(configuration)

@@ -16,41 +16,47 @@
 
 package uk.gov.hmrc.mobileversioncheck.domain
 
+import com.typesafe.config.Config
+import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ValueReader
+import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.{Android, iOS}
 
 import scala.concurrent.Future
 
 case class NativeVersion(ios: VersionRange, android: VersionRange)
 
-trait LoadConfig {
-
-  import com.typesafe.config.Config
-
+trait ValidateAppVersion {
   def config: Config
-}
 
-trait ApprovedAppVersions extends LoadConfig {
+  def upgrade(deviceVersion: DeviceVersion, service: String): Future[Boolean] = {
 
-  import net.ceedubs.ficus.Ficus._
+    val appVersion: NativeVersion = service match {
+      case "rds" => {
+        implicit val nativeVersionReader: ValueReader[NativeVersion] = ValueReader.relative { _ =>
+          NativeVersion(
+            VersionRange(config.as[String]("approvedAppVersions.rds.ios")),
+            VersionRange(config.as[String]("approvedAppVersions.rds.android"))
+          )
+        }
+        config.as[NativeVersion]("approvedAppVersions.rds")
+      }
 
-  private implicit val nativeVersionReader: ValueReader[NativeVersion] = ValueReader.relative { _ =>
-    NativeVersion(
-      VersionRange(config.as[String]("approvedAppVersions.ios")),
-      VersionRange(config.as[String]("approvedAppVersions.android"))
-    )
-  }
+      case "ngc" => {
+        implicit val nativeVersionReader: ValueReader[NativeVersion] = ValueReader.relative { _ =>
+          NativeVersion(
+            VersionRange(config.as[String]("approvedAppVersions.ngc.ios")),
+            VersionRange(config.as[String]("approvedAppVersions.ngc.android"))
+          )
+        }
+        config.as[NativeVersion]("approvedAppVersions.ngc")
+      }
 
-  val appVersion: NativeVersion = config.as[NativeVersion]("approvedAppVersions")
-}
+      case _ => throw new IllegalStateException
+    }
 
-trait ValidateAppVersion extends ApprovedAppVersions {
-
-  import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.{Android, iOS}
-
-  def upgrade(deviceVersion: DeviceVersion): Future[Boolean] = {
     val outsideValidRange = deviceVersion.os match {
-      case `iOS` => appVersion.ios.excluded(Version(deviceVersion.version))
-      case Android => appVersion.android.excluded(Version(deviceVersion.version))
+      case `iOS`   => !appVersion.ios.includes(Version(deviceVersion.version))
+      case Android => !appVersion.android.includes(Version(deviceVersion.version))
     }
     Future.successful(outsideValidRange)
   }

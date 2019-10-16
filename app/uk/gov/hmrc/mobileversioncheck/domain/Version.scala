@@ -25,8 +25,6 @@ case class VersionRange(lowerBound: Option[Version],
                         upperBoundInclusive: Boolean,
                         qualifierStartsWith: Option[String] = None) {
 
-  def excluded(version: Version): Boolean = !includes(version)
-
   def includes(version: Version): Boolean = {
 
     if (qualifierStartsWith.isDefined) {
@@ -35,7 +33,6 @@ case class VersionRange(lowerBound: Option[Version],
         case _ => false
       }
     } else {
-
       val lbRange = lowerBound.fold(true)(lb => version.isAfter(lb) || (lowerBoundInclusive && lb.equals(version)))
       val ubRange = upperBound.fold(true)(ub => version.isBefore(ub) || (upperBoundInclusive && ub.equals(version)))
       lbRange && ubRange

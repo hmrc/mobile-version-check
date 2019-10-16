@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.mobileversioncheck.controllers
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 import com.google.inject.Singleton
 import javax.inject.Inject
 import play.api.Logger
@@ -23,7 +26,7 @@ import play.api.libs.json.{JsError, JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.mobileversioncheck.domain.{DeviceVersion, PreFlightCheckResponse}
+import uk.gov.hmrc.mobileversioncheck.domain._
 import uk.gov.hmrc.mobileversioncheck.service.VersionCheckService
 import uk.gov.hmrc.play.bootstrap.controller.{BackendBaseController, BackendController}
 
@@ -32,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 trait VersionCheckController extends BackendBaseController with HeaderValidator {
   implicit def executionContext: ExecutionContext
 
-  def versionCheck(journeyId: String): Action[JsValue] =
+  def versionCheck(journeyId: String, service: String): Action[JsValue] =
     validateAccept(acceptHeaderValidationRules).async(controllerComponents.parsers.json) { implicit request =>
       request.body
         .validate[DeviceVersion]
@@ -42,12 +45,14 @@ trait VersionCheckController extends BackendBaseController with HeaderValidator 
             Future.successful(BadRequest(JsError.toJson(errors)))
           },
           deviceVersion => {
-            doVersionCheck(deviceVersion, journeyId)
+            doVersionCheck(deviceVersion, journeyId, service.toLowerCase)
           }
         )
     }
 
-  def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result]
+  def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String, service: String)(
+    implicit hc:                    HeaderCarrier,
+    request:                        Request[_]): Future[Result]
 }
 
 @Singleton
@@ -59,11 +64,14 @@ class LiveVersionCheckController @Inject()(
     with VersionCheckController {
   override def parser: BodyParser[AnyContent] = cc.parsers.anyContent
 
-  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String)(
+  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String, callingService: String)(
     implicit hc:                             HeaderCarrier,
     request:                                 Request[_]): Future[Result] =
-    service.versionCheck(deviceVersion, journeyId).map { upgradeRequired =>
-      Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired)))
+    for {
+      upgradeRequired <- service.versionCheck(deviceVersion, journeyId, callingService)
+      appState        <- service.appState(callingService, deviceVersion)
+    } yield {
+      Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired, appState)))
     }
 }
 
@@ -76,14 +84,47 @@ class SandboxVersionCheckController @Inject()(
     with VersionCheckController {
   override def parser: BodyParser[AnyContent] = cc.parsers.anyContent
 
-  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String)(
+  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String, callingService: String)(
     implicit hc:                             HeaderCarrier,
     request:                                 Request[_]): Future[Result] = {
 
-    val result: Result = request.headers.get("SANDBOX-CONTROL") match {
-      case Some("ERROR-500")        => InternalServerError
-      case Some("UPGRADE-REQUIRED") => Ok(Json.toJson(PreFlightCheckResponse(true)))
-      case _                        => Ok(Json.toJson(PreFlightCheckResponse(false)))
+    val result: Result = (callingService, request.headers.get("SANDBOX-CONTROL")) match {
+      case (_, Some("ERROR-500")) => InternalServerError
+      case ("rds", Some("UPGRADE-REQUIRED")) =>
+        Ok(
+          Json.toJson(
+            PreFlightCheckResponse(
+              upgradeRequired = true,
+              Some(AppState(ACTIVE, None))
+            )))
+      case (_, Some("UPGRADE-REQUIRED")) =>
+        Ok(
+          Json.toJson(
+            PreFlightCheckResponse(upgradeRequired = true, None)
+          ))
+      case ("rds", Some("INACTIVE-APPSTATE")) =>
+        Ok(
+          Json.toJson(
+            PreFlightCheckResponse(
+              upgradeRequired = false,
+              Some(AppState(INACTIVE, Some(LocalDateTime.parse("2019-11-01T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME))))
+            )))
+      case ("ngc", Some("INACTIVE-APPSTATE"))  => InternalServerError
+      case ("ngc", Some("SHUTTERED-APPSTATE")) => InternalServerError
+      case ("rds", Some("SHUTTERED-APPSTATE")) =>
+        Ok(
+          Json.toJson(
+            PreFlightCheckResponse(
+              upgradeRequired = false,
+              Some(AppState(SHUTTERED, Some(LocalDateTime.parse("2020-01-01T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME))))
+            )))
+      case _ =>
+        Ok(
+          Json.toJson(
+            PreFlightCheckResponse(
+              upgradeRequired = false,
+              Some(AppState(ACTIVE, None))
+            )))
     }
 
     Future successful result

@@ -27,4 +27,6 @@ trait BaseSpec extends PlaySpec with MockFactory with ScalaFutures {
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
   val iOSVersion = DeviceVersion(iOS, "0.1")
   val journeyId  = "journeyId"
+  val ngcService = "ngc"
+  val rdsService = "rds"
 }
