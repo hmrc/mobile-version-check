@@ -6,17 +6,13 @@ The upgrade status is determined using the supplied POST data.
   
 * **URL**
 
-  `/mobile-version-check`
+  `/mobile-version-check/rds`
 
 * **Method:**
   
   `POST`
 
 *  **URL Params**
-
-    `service=rds`
-    
-    This is the app that is calling it and this will result in the return of app state as NGC does not need this feature
  
    `journeyId=[journeyId]`
    

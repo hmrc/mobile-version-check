@@ -12,7 +12,7 @@ class SandboxMobileVersionCheckISpec extends BaseISpec {
   val mobileIdHeader: (String, String) = "X-MOBILE-USER-ID" -> "208606423740"
 
   def request(service: String): WSRequest =
-    wsUrl(s"/mobile-version-check?journeyId=journeyId&service=$service").addHttpHeaders(acceptJsonHeader, mobileIdHeader)
+    wsUrl(s"/mobile-version-check/$service?journeyId=journeyId").addHttpHeaders(acceptJsonHeader, mobileIdHeader)
 
   val scenarios = Table(
     ("testName", "callingService"),
