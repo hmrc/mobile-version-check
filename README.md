@@ -14,7 +14,7 @@ The service exposes the following end point:
 | *Task* | *Supported Methods* | *Description* |
 |--------|----|----|
 | ```/mobile-version-check``` | POST | Validates the mobile application version [More (NGC)...](docs/version-check.md) |
-| ```/mobile-version-check?service=rds``` | POST | Validates the mobile application version [More (RDS)...](docs/version-check-rds.md) |
+| ```/mobile-version-check/rds``` | POST | Validates the mobile application version [More (RDS)...](docs/version-check-rds.md) |
 
 
 # Sandbox

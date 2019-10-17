@@ -35,7 +35,7 @@ class LiveMobileVersionCheckStateInactiveISpec extends BaseISpec {
 
   forAll(scenarios) { (testName: String, callingService: String, lowestAcceptedIosVersion: String, lowestAcceptedAndroidVersion: String) =>
     s"POST /mobile-version-check $testName" should {
-      def request: WSRequest = wsUrl(s"/mobile-version-check?journeyId=journeyId&service=$callingService")
+      def request: WSRequest = wsUrl(s"/mobile-version-check/$callingService?journeyId=journeyId")
 
       s"indicate that an upgrade is required for a version below the lower bound version of iOS $testName" in {
         val response =
