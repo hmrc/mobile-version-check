@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.mobileversioncheck.service
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.time.Instant
 
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
@@ -47,9 +46,9 @@ class VersionCheckService @Inject()(val configuration: Configuration, val auditC
       case _                     => throw new IllegalStateException("Invalid State in config")
     }
 
-  private def configEndDate(path: String): Option[LocalDateTime] = {
+  private def configEndDate(path: String): Option[Instant] = {
     val dateString = configuration.get[String](path)
-    if (dateString.isEmpty) None else Some(LocalDateTime.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+    if (dateString.isEmpty) None else Some(Instant.parse(dateString))
   }
 
   def appState(service: String, deviceVersion: DeviceVersion)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Option[AppState]] =

@@ -29,11 +29,11 @@ trait BaseControllerSpec extends BaseSpec {
   val iOSRequestWithValidHeaders: FakeRequest[JsValue] = FakeRequest().withBody(iOSVersionJson).withHeaders(acceptJsonHeader)
   val upgradeNotRequiredResultRds          = s"""{"upgradeRequired":false,"appState":{"state":"ACTIVE"}}"""
   val upgradeRequiredResultRds             = s"""{"upgradeRequired":true,"appState":{"state":"ACTIVE"}}"""
-  val upgradeNotRequiredPreliveResultRds   = s"""{"upgradeRequired":false,"appState":{"state":"INACTIVE","endDate":"2019-11-01T00:00:00"}}"""
-  val upgradeNotRequiredEmergencyResultRds = s"""{"upgradeRequired":false,"appState":{"state":"SHUTTERED","endDate":"2020-01-01T00:00:00"}}"""
+  val upgradeNotRequiredPreliveResultRds   = s"""{"upgradeRequired":false,"appState":{"state":"INACTIVE","endDate":"2019-11-01T00:00:00Z"}}"""
+  val upgradeNotRequiredEmergencyResultRds = s"""{"upgradeRequired":false,"appState":{"state":"SHUTTERED","endDate":"2020-01-01T00:00:00Z"}}"""
   val upgradeNotRequiredResultNgc          = s"""{"upgradeRequired":false}"""
   val upgradeRequiredResultNgc             = s"""{"upgradeRequired":true}"""
-  val upgradeNotRequiredPreliveResultNgc  = s"""{"upgradeRequired":false}"""
+  val upgradeNotRequiredPreliveResultNgc   = s"""{"upgradeRequired":false}"""
   val upgradeNotRequiredEmergencyResultNgc = s"""{"upgradeRequired":false}"""
   val openAppState                         = Some(AppState(ACTIVE, None))
 }

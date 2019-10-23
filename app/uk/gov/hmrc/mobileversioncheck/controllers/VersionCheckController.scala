@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.mobileversioncheck.controllers
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.time.Instant
 
 import com.google.inject.Singleton
 import javax.inject.Inject
@@ -107,7 +106,7 @@ class SandboxVersionCheckController @Inject()(
           Json.toJson(
             PreFlightCheckResponse(
               upgradeRequired = false,
-              Some(AppState(INACTIVE, Some(LocalDateTime.parse("2019-11-01T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME))))
+              Some(AppState(INACTIVE, Some(Instant.parse("2019-11-01T00:00:00Z"))))
             )))
       case ("ngc", Some("INACTIVE-APPSTATE"))  => InternalServerError
       case ("ngc", Some("SHUTTERED-APPSTATE")) => InternalServerError
@@ -116,7 +115,7 @@ class SandboxVersionCheckController @Inject()(
           Json.toJson(
             PreFlightCheckResponse(
               upgradeRequired = false,
-              Some(AppState(SHUTTERED, Some(LocalDateTime.parse("2020-01-01T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME))))
+              Some(AppState(SHUTTERED, Some(Instant.parse("2020-01-01T00:00:00Z"))))
             )))
       case _ =>
         Ok(
