@@ -1,6 +1,6 @@
 package uk.gov.hmrc.mobileversioncheck
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import org.scalatest.prop.Tables.Table
@@ -41,26 +41,29 @@ class LiveMobileVersionCheckStateShutteredISpec extends BaseISpec {
         val response =
           request.addHttpHeaders(acceptJsonHeader).post(toJson(DeviceVersion(iOS, alterDeviceVersion(lowestAcceptedIosVersion, -1)))).futureValue
 
-        response.status shouldBe 200
+        response.status                                 shouldBe 200
         (response.json \ "upgradeRequired").as[Boolean] shouldBe true
-        (response.json \ "appState").asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(LocalDateTime.parse("2019-11-01T00:00:00")))), callingService)
+        (response.json \ "appState")
+          .asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))), callingService)
       }
 
       s"indicate that an upgrade is not required for a version equal to the lower bound version of iOS $testName" in {
         val response = request.addHttpHeaders(acceptJsonHeader).post(toJson(DeviceVersion(iOS, lowestAcceptedIosVersion))).futureValue
 
-        response.status shouldBe 200
+        response.status                                 shouldBe 200
         (response.json \ "upgradeRequired").as[Boolean] shouldBe false
-        (response.json \ "appState").asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(LocalDateTime.parse("2019-11-01T00:00:00")))), callingService)
+        (response.json \ "appState")
+          .asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))), callingService)
       }
 
       s"indicate that an upgrade is not required for a version above the lower bound version of iOS $testName" in {
         val response =
           request.addHttpHeaders(acceptJsonHeader).post(toJson(DeviceVersion(iOS, alterDeviceVersion(lowestAcceptedIosVersion, 1)))).futureValue
 
-        response.status shouldBe 200
+        response.status                                 shouldBe 200
         (response.json \ "upgradeRequired").as[Boolean] shouldBe false
-        (response.json \ "appState").asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(LocalDateTime.parse("2019-11-01T00:00:00")))), callingService)
+        (response.json \ "appState")
+          .asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))), callingService)
       }
 
       s"indicate that an upgrade is required for a version below the lower bound version of android $testName" in {
@@ -69,17 +72,19 @@ class LiveMobileVersionCheckStateShutteredISpec extends BaseISpec {
           .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, -1))))
           .futureValue
 
-        response.status shouldBe 200
+        response.status                                 shouldBe 200
         (response.json \ "upgradeRequired").as[Boolean] shouldBe true
-        (response.json \ "appState").asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(LocalDateTime.parse("2019-11-01T00:00:00")))), callingService)
+        (response.json \ "appState")
+          .asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))), callingService)
       }
 
       s"indicate that an upgrade is not required for a version equal to the lower bound version of android $testName" in {
         val response = request.addHttpHeaders(acceptJsonHeader).post(toJson(DeviceVersion(Android, lowestAcceptedAndroidVersion))).futureValue
 
-        response.status shouldBe 200
+        response.status                                 shouldBe 200
         (response.json \ "upgradeRequired").as[Boolean] shouldBe false
-        (response.json \ "appState").asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(LocalDateTime.parse("2019-11-01T00:00:00")))), callingService)
+        (response.json \ "appState")
+          .asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))), callingService)
       }
 
       s"indicate that an upgrade is not required for a version above the lower bound version of android $testName" in {
@@ -88,9 +93,10 @@ class LiveMobileVersionCheckStateShutteredISpec extends BaseISpec {
           .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, 1))))
           .futureValue
 
-        response.status shouldBe 200
+        response.status                                 shouldBe 200
         (response.json \ "upgradeRequired").as[Boolean] shouldBe false
-        (response.json \ "appState").asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(LocalDateTime.parse("2019-11-01T00:00:00")))), callingService)
+        (response.json \ "appState")
+          .asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))), callingService)
       }
     }
   }

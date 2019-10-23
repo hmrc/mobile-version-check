@@ -56,7 +56,7 @@ abstract class BaseISpec
       "approvedAppVersions.rds.ios"     -> "[1.0.0,]",
       "approvedAppVersions.rds.android" -> "[1.0.0,]",
       "rds.state"                       -> "INACTIVE",
-      "rds.endDate"                     -> "2019-11-01T00:00:00")
+      "rds.endDate"                     -> "2019-11-01T00:00:00Z")
       conf
     } else if (state == SHUTTERED) {
       val conf = baseConfig + ("approvedAppVersions.ngc.ios" -> "[1.0.0,]",
@@ -64,7 +64,7 @@ abstract class BaseISpec
       "approvedAppVersions.rds.ios"     -> "[1.0.0,]",
       "approvedAppVersions.rds.android" -> "[1.0.0,]",
       "rds.state"                       -> "SHUTTERED",
-      "rds.endDate"                     -> "2019-11-01T00:00:00")
+      "rds.endDate"                     -> "2019-11-01T00:00:00Z")
       conf
     } else {
       baseConfig
