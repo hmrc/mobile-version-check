@@ -25,9 +25,9 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
   }
 
   val scenarios = Table(
-    ("testName", "callingService", "lowestAcceptedIosVersion", "lowestAcceptedIosVersion"),
+    ("testName", "callingService", "lowestAcceptedIosVersion", "lowestAcceptedAndroidVersion"),
     ("As NGC Service", ngcService, "3.0.7", "5.0.22"),
-    ("As RDS Service", rdsService, "4.0.7", "6.0.22")
+    ("As RDS Service", rdsService, "0.0.1", "0.0.1")
   )
 
   forAll(scenarios) { (testName: String, callingService: String, lowestAcceptedIosVersion: String, lowestAcceptedAndroidVersion: String) =>
