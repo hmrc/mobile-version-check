@@ -32,7 +32,7 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
 
   forAll(scenarios) { (testName: String, callingService: String, lowestAcceptedIosVersion: String, lowestAcceptedAndroidVersion: String) =>
     s"POST /mobile-version-check $testName" should {
-      def request: WSRequest = wsUrl(s"/mobile-version-check/$callingService?journeyId=journeyId")
+      def request: WSRequest = wsUrl(s"/mobile-version-check/$callingService?journeyId=dd1ebd2e-7156-47c7-842b-8308099c5e75")
 
       s"indicate that an upgrade is required for a version below the lower bound version of iOS $testName" in {
         val response =
@@ -88,6 +88,24 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
         response.status                                 shouldBe 200
         (response.json \ "upgradeRequired").as[Boolean] shouldBe false
         (response.json \ "appState").asOpt[AppState]    shouldBe getExpectedResponse(Some(AppState(ACTIVE, None)), callingService)
+      }
+
+      s"return 400 BAD REQUEST if journeyId is not supplied $testName" in {
+        val response = wsUrl(s"/mobile-version-check/$callingService")
+          .addHttpHeaders(acceptJsonHeader)
+          .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, 1))))
+          .futureValue
+
+        response.status shouldBe 400
+      }
+
+      s"return 400 BAD REQUEST if journeyId is invalid$testName" in {
+        val response = wsUrl(s"/mobile-version-check/$callingService?journeyId=ThisIsAnInvalidJourneyId")
+          .addHttpHeaders(acceptJsonHeader)
+          .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, 1))))
+          .futureValue
+
+        response.status shouldBe 400
       }
     }
   }

@@ -15,14 +15,16 @@ lazy val microservice = Project(appName, file("."))
     libraryDependencies ++= AppDependencies(),
     dependencyOverrides ++= AppDependencies.overrides(),
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(warnScalaVersionEviction = false),
-    coverageMinimum := 95,
+    coverageMinimum := 90,
     coverageFailOnMinimum := true,
     coverageHighlighting := true,
     coverageExcludedPackages := "<empty>;.*Routes.*;app.*;.*prod;.*definition;.*testOnlyDoNotUseInAppConf;.*com.kenshoo.*;.*javascript.*;.*BuildInfo;.*Reverse.*"
-
   )
   .settings(
     publishingSettings: _*
+  )
+  .settings(
+    routesImport ++= Seq("uk.gov.hmrc.mobileversioncheck.domain.types._", "uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes._")
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
