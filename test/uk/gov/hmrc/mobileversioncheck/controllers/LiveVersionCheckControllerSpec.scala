@@ -23,6 +23,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.Android
+import uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobileversioncheck.domain.{AppState, DeviceVersion}
 import uk.gov.hmrc.mobileversioncheck.service.VersionCheckService
 
@@ -33,9 +34,9 @@ class LiveVersionCheckControllerSpec extends BaseControllerSpec {
   val service: VersionCheckService = mock[VersionCheckService]
   val controller = new LiveVersionCheckController(service, stubControllerComponents())
 
-  def mockServiceCall(upgradeRequired: Boolean, optionalJourneyId: Option[String], deviceVersion: DeviceVersion = iOSVersion): Unit =
+  def mockServiceCall(upgradeRequired: Boolean, optionalJourneyId: Option[JourneyId], deviceVersion: DeviceVersion = iOSVersion): Unit =
     (service
-      .versionCheck(_: DeviceVersion, _: String, _: String)(_: HeaderCarrier, _: ExecutionContext))
+      .versionCheck(_: DeviceVersion, _: JourneyId, _: String)(_: HeaderCarrier, _: ExecutionContext))
       .expects(deviceVersion, journeyId, *, *, *)
       .returning(Future successful upgradeRequired)
 

@@ -22,11 +22,13 @@ import org.scalatestplus.play.PlaySpec
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.iOS
+import uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes.JourneyId
+import eu.timepit.refined.auto._
 
 trait BaseSpec extends PlaySpec with MockFactory with ScalaFutures {
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
   val iOSVersion = DeviceVersion(iOS, "0.1")
-  val journeyId  = "journeyId"
+  val journeyId: JourneyId = "dd1ebd2e-7156-47c7-842b-8308099c5e75"
   val ngcService = "ngc"
   val rdsService = "rds"
 }

@@ -26,15 +26,18 @@ import play.api.mvc._
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.domain._
+import uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes
+import uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes.{JourneyId, Service}
 import uk.gov.hmrc.mobileversioncheck.service.VersionCheckService
 import uk.gov.hmrc.play.bootstrap.controller.{BackendBaseController, BackendController}
 
 import scala.concurrent.{ExecutionContext, Future}
+import eu.timepit.refined.refineMV
 
 trait VersionCheckController extends BackendBaseController with HeaderValidator {
   implicit def executionContext: ExecutionContext
 
-  def versionCheck(journeyId: String, service: String): Action[JsValue] =
+  def versionCheck(journeyId: JourneyId, service: String): Action[JsValue] =
     validateAccept(acceptHeaderValidationRules).async(controllerComponents.parsers.json) { implicit request =>
       request.body
         .validate[DeviceVersion]
@@ -49,7 +52,7 @@ trait VersionCheckController extends BackendBaseController with HeaderValidator 
         )
     }
 
-  def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String, service: String)(
+  def doVersionCheck(deviceVersion: DeviceVersion, journeyId: JourneyId, service: String)(
     implicit hc:                    HeaderCarrier,
     request:                        Request[_]): Future[Result]
 }
@@ -63,7 +66,7 @@ class LiveVersionCheckController @Inject()(
     with VersionCheckController {
   override def parser: BodyParser[AnyContent] = cc.parsers.anyContent
 
-  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String, callingService: String)(
+  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: JourneyId, callingService: String)(
     implicit hc:                             HeaderCarrier,
     request:                                 Request[_]): Future[Result] =
     for {
@@ -83,7 +86,7 @@ class SandboxVersionCheckController @Inject()(
     with VersionCheckController {
   override def parser: BodyParser[AnyContent] = cc.parsers.anyContent
 
-  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: String, callingService: String)(
+  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: JourneyId, callingService: String)(
     implicit hc:                             HeaderCarrier,
     request:                                 Request[_]): Future[Result] = {
 

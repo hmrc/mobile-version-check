@@ -4,10 +4,23 @@ import sbt._
 
 object AppDependencies {
 
+  private val bootstrapPlayVersion     = "0.41.0"
+  private val playHmrcVersion          = "3.4.0-play-26"
+  private val scalatestPlusPlayVersion = "3.1.2"
+
+  private val scalaMockVersion       = "4.1.0"
+  private val pegdownVersion         = "1.6.0"
+  private val integrationTestVersion = "0.4.0-play-26"
+  private val cucumberJunitVersion   = "1.2.5"
+  private val cucumberScalaVersion   = "1.2.5"
+  private val wiremockVersion        = "2.20.0"
+  private val refinedVersion         = "0.9.4"
+
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-play-26" % "0.41.0",
-    "uk.gov.hmrc" %% "play-hmrc-api"     % "3.4.0-play-26"
+    "uk.gov.hmrc" %% "bootstrap-play-26" % bootstrapPlayVersion,
+    "uk.gov.hmrc" %% "play-hmrc-api"     % playHmrcVersion,
+    "eu.timepit"  %% "refined"           % refinedVersion
   )
 
   trait TestDependencies {
@@ -15,15 +28,13 @@ object AppDependencies {
     lazy val test:  Seq[ModuleID] = ???
   }
 
-  private val scalatestPlusPlayVersion = "3.1.2"
-
   object Test {
     def apply(): Seq[ModuleID] =
       new TestDependencies {
         override lazy val test: Seq[ModuleID] = Seq(
           "org.scalatestplus.play" %% "scalatestplus-play" % scalatestPlusPlayVersion % scope,
-          "org.scalamock"          %% "scalamock"          % "4.1.0"                  % scope,
-          "org.pegdown"            % "pegdown"             % "1.6.0"                  % scope
+          "org.scalamock"          %% "scalamock"          % scalaMockVersion         % scope,
+          "org.pegdown"            % "pegdown"             % pegdownVersion           % scope
         )
       }.test
   }
@@ -36,12 +47,12 @@ object AppDependencies {
 
         override lazy val test: Seq[ModuleID] = Seq(
           "org.scalatestplus.play" %% "scalatestplus-play"       % scalatestPlusPlayVersion % scope,
-          "org.pegdown"            % "pegdown"                   % "1.6.0"                  % scope,
-          "uk.gov.hmrc"            %% "service-integration-test" % "0.4.0-play-26"          % scope,
+          "org.pegdown"            % "pegdown"                   % pegdownVersion           % scope,
+          "uk.gov.hmrc"            %% "service-integration-test" % integrationTestVersion   % scope,
           "com.typesafe.play"      %% "play-test"                % PlayVersion.current      % scope,
-          "info.cukes"             %% "cucumber-scala"           % "1.2.5"                  % scope,
-          "info.cukes"             % "cucumber-junit"            % "1.2.5"                  % scope,
-          "com.github.tomakehurst" % "wiremock"                  % "2.20.0"                 % scope
+          "info.cukes"             %% "cucumber-scala"           % cucumberJunitVersion     % scope,
+          "info.cukes"             % "cucumber-junit"            % cucumberScalaVersion     % scope,
+          "com.github.tomakehurst" % "wiremock"                  % wiremockVersion          % scope
         )
       }.test
 
