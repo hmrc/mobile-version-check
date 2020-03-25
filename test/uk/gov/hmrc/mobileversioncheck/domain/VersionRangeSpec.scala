@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ class VersionRangeSpec extends FlatSpec with Matchers {
 
     val r = VersionRange("(,1.0.0]")
 
-    r.lowerBound shouldBe None
+    r.lowerBound          shouldBe None
     r.lowerBoundInclusive shouldBe false
-    r.upperBound shouldBe Some(Version("1.0.0"))
+    r.upperBound          shouldBe Some(Version("1.0.0"))
     r.upperBoundInclusive shouldBe true
 
   }
@@ -35,9 +35,9 @@ class VersionRangeSpec extends FlatSpec with Matchers {
 
     val r = VersionRange("[1.0.0]")
 
-    r.lowerBound shouldBe Some(Version("1.0.0"))
+    r.lowerBound          shouldBe Some(Version("1.0.0"))
     r.lowerBoundInclusive shouldBe true
-    r.upperBound shouldBe Some(Version("1.0.0"))
+    r.upperBound          shouldBe Some(Version("1.0.0"))
     r.upperBoundInclusive shouldBe true
 
   }
@@ -46,9 +46,9 @@ class VersionRangeSpec extends FlatSpec with Matchers {
 
     val r = VersionRange("[1.2.0,1.3.0]")
 
-    r.lowerBound shouldBe Some(Version("1.2.0"))
+    r.lowerBound          shouldBe Some(Version("1.2.0"))
     r.lowerBoundInclusive shouldBe true
-    r.upperBound shouldBe Some(Version("1.3.0"))
+    r.upperBound          shouldBe Some(Version("1.3.0"))
     r.upperBoundInclusive shouldBe true
 
   }
@@ -57,9 +57,9 @@ class VersionRangeSpec extends FlatSpec with Matchers {
 
     val r = VersionRange("[1.0.0,2.0.0)")
 
-    r.lowerBound shouldBe Some(Version("1.0.0"))
+    r.lowerBound          shouldBe Some(Version("1.0.0"))
     r.lowerBoundInclusive shouldBe true
-    r.upperBound shouldBe Some(Version("2.0.0"))
+    r.upperBound          shouldBe Some(Version("2.0.0"))
     r.upperBoundInclusive shouldBe false
 
   }
@@ -68,9 +68,9 @@ class VersionRangeSpec extends FlatSpec with Matchers {
 
     val r = VersionRange("[8.0.0,8.4.1]")
 
-    r.lowerBound shouldBe Some(Version("8.0.0"))
+    r.lowerBound          shouldBe Some(Version("8.0.0"))
     r.lowerBoundInclusive shouldBe true
-    r.upperBound shouldBe Some(Version("8.4.1"))
+    r.upperBound          shouldBe Some(Version("8.4.1"))
     r.upperBoundInclusive shouldBe true
 
   }
@@ -79,9 +79,9 @@ class VersionRangeSpec extends FlatSpec with Matchers {
 
     val r = VersionRange("[8.0.0, 8.4.1]")
 
-    r.lowerBound shouldBe Some(Version("8.0.0"))
+    r.lowerBound          shouldBe Some(Version("8.0.0"))
     r.lowerBoundInclusive shouldBe true
-    r.upperBound shouldBe Some(Version("8.4.1"))
+    r.upperBound          shouldBe Some(Version("8.4.1"))
     r.upperBoundInclusive shouldBe true
 
   }
@@ -90,9 +90,9 @@ class VersionRangeSpec extends FlatSpec with Matchers {
 
     val r = VersionRange("[1.5.0,)")
 
-    r.lowerBound shouldBe Some(Version("1.5.0"))
+    r.lowerBound          shouldBe Some(Version("1.5.0"))
     r.lowerBoundInclusive shouldBe true
-    r.upperBound shouldBe None
+    r.upperBound          shouldBe None
     r.upperBoundInclusive shouldBe false
 
   }
@@ -100,9 +100,9 @@ class VersionRangeSpec extends FlatSpec with Matchers {
   it should "read the '[*-SNAPSHOT]' range'" in {
     val r = VersionRange("[*-SNAPSHOT]")
 
-    r.lowerBound shouldBe None
+    r.lowerBound          shouldBe None
     r.lowerBoundInclusive shouldBe false
-    r.upperBound shouldBe None
+    r.upperBound          shouldBe None
     r.upperBoundInclusive shouldBe false
     r.qualifierStartsWith shouldBe Some("SNAPSHOT")
   }

@@ -4,15 +4,16 @@ import org.scalatest.prop.TableDrivenPropertyChecks.forAll
 import org.scalatest.prop.Tables.Table
 import play.api.libs.json.Json.toJson
 import play.api.libs.ws.WSRequest
-import uk.gov.hmrc.mobileversioncheck.domain.{AppState, DeviceVersion}
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.{Android, iOS}
+import uk.gov.hmrc.mobileversioncheck.domain.{AppState, DeviceVersion}
 import uk.gov.hmrc.mobileversioncheck.support.BaseISpec
 
 class SandboxMobileVersionCheckISpec extends BaseISpec {
   val mobileIdHeader: (String, String) = "X-MOBILE-USER-ID" -> "208606423740"
 
   def request(service: String): WSRequest =
-    wsUrl(s"/mobile-version-check/$service?journeyId=dd1ebd2e-7156-47c7-842b-8308099c5e75").addHttpHeaders(acceptJsonHeader, mobileIdHeader)
+    wsUrl(s"/mobile-version-check/$service?journeyId=dd1ebd2e-7156-47c7-842b-8308099c5e75")
+      .addHttpHeaders(acceptJsonHeader, mobileIdHeader)
 
   val scenarios = Table(
     ("testName", "callingService"),
@@ -24,7 +25,10 @@ class SandboxMobileVersionCheckISpec extends BaseISpec {
     s"POST /sandbox/mobile-version-check $testName" should {
       s"respect the sandbox headers and return true when the UPGRADE-REQUIRED control is specified $testName" in {
         val response =
-          request(callingService).addHttpHeaders("SANDBOX-CONTROL" -> "UPGRADE-REQUIRED").post(toJson(DeviceVersion(iOS, "3.0.8"))).futureValue
+          request(callingService)
+            .addHttpHeaders("SANDBOX-CONTROL" -> "UPGRADE-REQUIRED")
+            .post(toJson(DeviceVersion(iOS, "3.0.8")))
+            .futureValue
 
         if (callingService == "ngc") {
           response.status                                 shouldBe 200
@@ -45,13 +49,19 @@ class SandboxMobileVersionCheckISpec extends BaseISpec {
       }
 
       s"respect the sandbox headers and return a 500 error when the ERROR-500 control is specified $testName" in {
-        val response = request(callingService).addHttpHeaders("SANDBOX-CONTROL" -> "ERROR-500").post(toJson(DeviceVersion(iOS, "3.0.8"))).futureValue
+        val response = request(callingService)
+          .addHttpHeaders("SANDBOX-CONTROL" -> "ERROR-500")
+          .post(toJson(DeviceVersion(iOS, "3.0.8")))
+          .futureValue
 
         response.status shouldBe 500
       }
       s"respect the sandbox headers and return correct appState when the INACTIVE-APPSTATE control is specified $testName" in {
         val response =
-          request(callingService).addHttpHeaders("SANDBOX-CONTROL" -> "INACTIVE-APPSTATE").post(toJson(DeviceVersion(iOS, "3.0.8"))).futureValue
+          request(callingService)
+            .addHttpHeaders("SANDBOX-CONTROL" -> "INACTIVE-APPSTATE")
+            .post(toJson(DeviceVersion(iOS, "3.0.8")))
+            .futureValue
 
         if (callingService == "ngc") {
           response.status shouldBe 500
@@ -62,7 +72,10 @@ class SandboxMobileVersionCheckISpec extends BaseISpec {
       }
       s"respect the sandbox headers and return correct appState when the SHUTTERED-APPSTATE control is specified $testName" in {
         val response =
-          request(callingService).addHttpHeaders("SANDBOX-CONTROL" -> "SHUTTERED-APPSTATE").post(toJson(DeviceVersion(iOS, "3.0.8"))).futureValue
+          request(callingService)
+            .addHttpHeaders("SANDBOX-CONTROL" -> "SHUTTERED-APPSTATE")
+            .post(toJson(DeviceVersion(iOS, "3.0.8")))
+            .futureValue
 
         if (callingService == "ngc") {
           response.status shouldBe 500

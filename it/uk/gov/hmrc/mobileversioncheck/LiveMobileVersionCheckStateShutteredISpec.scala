@@ -22,7 +22,10 @@ class LiveMobileVersionCheckStateShutteredISpec extends BaseISpec {
     }
   }
 
-  private def alterDeviceVersion(lowestAcceptedVersion: String, valueChange: Int): String = {
+  private def alterDeviceVersion(
+    lowestAcceptedVersion: String,
+    valueChange:           Int
+  ): String = {
     val version = Version(lowestAcceptedVersion)
     version.copy(revision = version.revision + valueChange).toString
   }
@@ -33,89 +36,124 @@ class LiveMobileVersionCheckStateShutteredISpec extends BaseISpec {
     ("As RDS Service", rdsService, "0.0.1", "0.0.1")
   )
 
-  forAll(scenarios) { (testName: String, callingService: String, lowestAcceptedIosVersion: String, lowestAcceptedAndroidVersion: String) =>
-    s"POST /mobile-version-check $testName" should {
-      def request: WSRequest = wsUrl(s"/mobile-version-check/$callingService?journeyId=dd1ebd2e-7156-47c7-842b-8308099c5e75")
+  forAll(scenarios) {
+    (testName:                     String,
+     callingService:               String,
+     lowestAcceptedIosVersion:     String,
+     lowestAcceptedAndroidVersion: String) =>
+      s"POST /mobile-version-check $testName" should {
+        def request: WSRequest =
+          wsUrl(s"/mobile-version-check/$callingService?journeyId=dd1ebd2e-7156-47c7-842b-8308099c5e75")
 
-      s"indicate that an upgrade is required for a version below the lower bound version of iOS $testName" in {
-        val response =
-          request.addHttpHeaders(acceptJsonHeader).post(toJson(DeviceVersion(iOS, alterDeviceVersion(lowestAcceptedIosVersion, -1)))).futureValue
+        s"indicate that an upgrade is required for a version below the lower bound version of iOS $testName" in {
+          val response =
+            request
+              .addHttpHeaders(acceptJsonHeader)
+              .post(toJson(DeviceVersion(iOS, alterDeviceVersion(lowestAcceptedIosVersion, -1))))
+              .futureValue
 
-        response.status                                 shouldBe 200
-        (response.json \ "upgradeRequired").as[Boolean] shouldBe true
-        (response.json \ "appState")
-          .asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))), callingService)
+          response.status                                 shouldBe 200
+          (response.json \ "upgradeRequired").as[Boolean] shouldBe true
+          (response.json \ "appState")
+            .asOpt[AppState] shouldBe getExpectedResponse(
+            Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))),
+            callingService
+          )
+        }
+
+        s"indicate that an upgrade is not required for a version equal to the lower bound version of iOS $testName" in {
+          val response = request
+            .addHttpHeaders(acceptJsonHeader)
+            .post(toJson(DeviceVersion(iOS, lowestAcceptedIosVersion)))
+            .futureValue
+
+          response.status                                 shouldBe 200
+          (response.json \ "upgradeRequired").as[Boolean] shouldBe false
+          (response.json \ "appState")
+            .asOpt[AppState] shouldBe getExpectedResponse(
+            Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))),
+            callingService
+          )
+        }
+
+        s"indicate that an upgrade is not required for a version above the lower bound version of iOS $testName" in {
+          val response =
+            request
+              .addHttpHeaders(acceptJsonHeader)
+              .post(toJson(DeviceVersion(iOS, alterDeviceVersion(lowestAcceptedIosVersion, 1))))
+              .futureValue
+
+          response.status                                 shouldBe 200
+          (response.json \ "upgradeRequired").as[Boolean] shouldBe false
+          (response.json \ "appState")
+            .asOpt[AppState] shouldBe getExpectedResponse(
+            Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))),
+            callingService
+          )
+        }
+
+        s"indicate that an upgrade is required for a version below the lower bound version of android $testName" in {
+          val response = request
+            .addHttpHeaders(acceptJsonHeader)
+            .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, -1))))
+            .futureValue
+
+          response.status                                 shouldBe 200
+          (response.json \ "upgradeRequired").as[Boolean] shouldBe true
+          (response.json \ "appState")
+            .asOpt[AppState] shouldBe getExpectedResponse(
+            Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))),
+            callingService
+          )
+        }
+
+        s"indicate that an upgrade is not required for a version equal to the lower bound version of android $testName" in {
+          val response = request
+            .addHttpHeaders(acceptJsonHeader)
+            .post(toJson(DeviceVersion(Android, lowestAcceptedAndroidVersion)))
+            .futureValue
+
+          response.status                                 shouldBe 200
+          (response.json \ "upgradeRequired").as[Boolean] shouldBe false
+          (response.json \ "appState")
+            .asOpt[AppState] shouldBe getExpectedResponse(
+            Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))),
+            callingService
+          )
+        }
+
+        s"indicate that an upgrade is not required for a version above the lower bound version of android $testName" in {
+          val response = request
+            .addHttpHeaders(acceptJsonHeader)
+            .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, 1))))
+            .futureValue
+
+          response.status                                 shouldBe 200
+          (response.json \ "upgradeRequired").as[Boolean] shouldBe false
+          (response.json \ "appState")
+            .asOpt[AppState] shouldBe getExpectedResponse(
+            Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))),
+            callingService
+          )
+        }
+
+        s"return 400 BAD REQUEST if journeyId is not supplied $testName" in {
+          val response = wsUrl(s"/mobile-version-check/$callingService")
+            .addHttpHeaders(acceptJsonHeader)
+            .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, 1))))
+            .futureValue
+
+          response.status shouldBe 400
+        }
+
+        s"return 400 BAD REQUEST if journeyId is invalid$testName" in {
+          val response = wsUrl(s"/mobile-version-check/$callingService?journeyId=ThisIsAnInvalidJourneyId")
+            .addHttpHeaders(acceptJsonHeader)
+            .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, 1))))
+            .futureValue
+
+          response.status shouldBe 400
+        }
       }
-
-      s"indicate that an upgrade is not required for a version equal to the lower bound version of iOS $testName" in {
-        val response = request.addHttpHeaders(acceptJsonHeader).post(toJson(DeviceVersion(iOS, lowestAcceptedIosVersion))).futureValue
-
-        response.status                                 shouldBe 200
-        (response.json \ "upgradeRequired").as[Boolean] shouldBe false
-        (response.json \ "appState")
-          .asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))), callingService)
-      }
-
-      s"indicate that an upgrade is not required for a version above the lower bound version of iOS $testName" in {
-        val response =
-          request.addHttpHeaders(acceptJsonHeader).post(toJson(DeviceVersion(iOS, alterDeviceVersion(lowestAcceptedIosVersion, 1)))).futureValue
-
-        response.status                                 shouldBe 200
-        (response.json \ "upgradeRequired").as[Boolean] shouldBe false
-        (response.json \ "appState")
-          .asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))), callingService)
-      }
-
-      s"indicate that an upgrade is required for a version below the lower bound version of android $testName" in {
-        val response = request
-          .addHttpHeaders(acceptJsonHeader)
-          .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, -1))))
-          .futureValue
-
-        response.status                                 shouldBe 200
-        (response.json \ "upgradeRequired").as[Boolean] shouldBe true
-        (response.json \ "appState")
-          .asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))), callingService)
-      }
-
-      s"indicate that an upgrade is not required for a version equal to the lower bound version of android $testName" in {
-        val response = request.addHttpHeaders(acceptJsonHeader).post(toJson(DeviceVersion(Android, lowestAcceptedAndroidVersion))).futureValue
-
-        response.status                                 shouldBe 200
-        (response.json \ "upgradeRequired").as[Boolean] shouldBe false
-        (response.json \ "appState")
-          .asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))), callingService)
-      }
-
-      s"indicate that an upgrade is not required for a version above the lower bound version of android $testName" in {
-        val response = request
-          .addHttpHeaders(acceptJsonHeader)
-          .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, 1))))
-          .futureValue
-
-        response.status                                 shouldBe 200
-        (response.json \ "upgradeRequired").as[Boolean] shouldBe false
-        (response.json \ "appState")
-          .asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(SHUTTERED, Some(Instant.parse("2019-11-01T00:00:00Z")))), callingService)
-      }
-
-      s"return 400 BAD REQUEST if journeyId is not supplied $testName" in {
-        val response = wsUrl(s"/mobile-version-check/$callingService")
-          .addHttpHeaders(acceptJsonHeader)
-          .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, 1))))
-          .futureValue
-
-        response.status shouldBe 400
-      }
-
-      s"return 400 BAD REQUEST if journeyId is invalid$testName" in {
-        val response = wsUrl(s"/mobile-version-check/$callingService?journeyId=ThisIsAnInvalidJourneyId")
-          .addHttpHeaders(acceptJsonHeader)
-          .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, 1))))
-          .futureValue
-
-        response.status shouldBe 400
-      }
-    }
   }
 }

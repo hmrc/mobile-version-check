@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,17 @@ import play.api.libs.json._
 trait NativeOS
 
 object NativeOS {
+
   case object iOS extends NativeOS {
     override def toString: String = "ios"
   }
+
   case object Android extends NativeOS {
     override def toString: String = "android"
   }
 
   val reads: Reads[NativeOS] = new Reads[NativeOS] {
+
     override def reads(json: JsValue): JsResult[NativeOS] = json match {
       case JsString("ios")     => JsSuccess(iOS)
       case JsString("android") => JsSuccess(Android)
@@ -37,6 +40,7 @@ object NativeOS {
   }
 
   val writes: Writes[NativeOS] = new Writes[NativeOS] {
+
     override def writes(os: NativeOS): JsString = os match {
       case `iOS`   => JsString("ios")
       case Android => JsString("android")

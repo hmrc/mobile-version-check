@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,14 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
   val sandboxControlHeader = "SANDBOX-CONTROL"
   val androidVersion       = DeviceVersion(Android, "0.1")
 
-  val requestWithoutOS:               FakeRequest[JsValue] = FakeRequest().withBody(parse("""{ "version": "1.0" }""")).withHeaders(acceptJsonHeader)
-  val requestWithoutVersion:          FakeRequest[JsValue] = FakeRequest().withBody(parse("""{ "os": "iOS" }""")).withHeaders(acceptJsonHeader)
-  val androidRequestWithAcceptHeader: FakeRequest[JsValue] = FakeRequest().withBody(toJson(androidVersion)).withHeaders(acceptJsonHeader)
+  val requestWithoutOS: FakeRequest[JsValue] =
+    FakeRequest().withBody(parse("""{ "version": "1.0" }""")).withHeaders(acceptJsonHeader)
+
+  val requestWithoutVersion: FakeRequest[JsValue] =
+    FakeRequest().withBody(parse("""{ "os": "iOS" }""")).withHeaders(acceptJsonHeader)
+
+  val androidRequestWithAcceptHeader: FakeRequest[JsValue] =
+    FakeRequest().withBody(toJson(androidVersion)).withHeaders(acceptJsonHeader)
 
   val scenarios = Table(
     ("testName", "callingService"),
@@ -86,7 +91,8 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       }
 
       s"return upgradeRequired result for android OS $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
+        val result =
+          controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
         status(result) mustBe 200
         contentAsJson(result) mustBe parse(upgradeNotRequiredResultRds)
       }
@@ -102,7 +108,8 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       }
 
       s"require a version $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(requestWithoutVersion.withHeaders(sandboxHeader))
+        val result =
+          controller.versionCheck(journeyId, callingService)(requestWithoutVersion.withHeaders(sandboxHeader))
         status(result) mustBe 400
       }
     }
@@ -117,7 +124,8 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       }
 
       s"return upgradeRequired result for android OS $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
+        val result =
+          controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
         status(result) mustBe 500
       }
 
@@ -132,7 +140,8 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       }
 
       s"require a version $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(requestWithoutVersion.withHeaders(sandboxHeader))
+        val result =
+          controller.versionCheck(journeyId, callingService)(requestWithoutVersion.withHeaders(sandboxHeader))
         status(result) mustBe 400
       }
     }
@@ -144,19 +153,23 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       s"return upgradeRequired false when a journey id is supplied $testName" in {
         val result = controller.versionCheck(journeyId, callingService)(iosRequestWithRandomSandboxControlHeader)
         status(result) mustBe 200
-        contentAsJson(result) mustBe (if (callingService == "ngc") parse(upgradeRequiredResultNgc) else parse(upgradeRequiredResultRds))
+        contentAsJson(result) mustBe (if (callingService == "ngc") parse(upgradeRequiredResultNgc)
+                                      else parse(upgradeRequiredResultRds))
       }
 
       s"return upgradeRequired false when no journey id is supplied $testName" in {
         val result = controller.versionCheck(journeyId, callingService)(iosRequestWithRandomSandboxControlHeader)
         status(result) mustBe 200
-        contentAsJson(result) mustBe (if (callingService == "ngc") parse(upgradeRequiredResultNgc) else parse(upgradeRequiredResultRds))
+        contentAsJson(result) mustBe (if (callingService == "ngc") parse(upgradeRequiredResultNgc)
+                                      else parse(upgradeRequiredResultRds))
       }
 
       s"return upgradeRequired result for android OS $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
+        val result =
+          controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
         status(result) mustBe 200
-        contentAsJson(result) mustBe (if (callingService == "ngc") parse(upgradeRequiredResultNgc) else parse(upgradeRequiredResultRds))
+        contentAsJson(result) mustBe (if (callingService == "ngc") parse(upgradeRequiredResultNgc)
+                                      else parse(upgradeRequiredResultRds))
       }
 
       s"require the accept header $testName" in {
@@ -170,7 +183,8 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       }
 
       s"require a version $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(requestWithoutVersion.withHeaders(sandboxHeader))
+        val result =
+          controller.versionCheck(journeyId, callingService)(requestWithoutVersion.withHeaders(sandboxHeader))
         status(result) mustBe 400
       }
     }
@@ -201,7 +215,8 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       }
 
       s"return upgradeRequired result for android OS $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
+        val result =
+          controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
         if (callingService == "ngc") {
           status(result) mustBe 500
         } else {
@@ -221,7 +236,8 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       }
 
       s"require a version $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(requestWithoutVersion.withHeaders(sandboxHeader))
+        val result =
+          controller.versionCheck(journeyId, callingService)(requestWithoutVersion.withHeaders(sandboxHeader))
         status(result) mustBe 400
       }
     }
@@ -251,7 +267,8 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       }
 
       s"return upgradeRequired result for android OS $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
+        val result =
+          controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
         if (callingService == "ngc") {
           status(result) mustBe 500
         } else {
@@ -271,7 +288,8 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       }
 
       s"require a version $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(requestWithoutVersion.withHeaders(sandboxHeader))
+        val result =
+          controller.versionCheck(journeyId, callingService)(requestWithoutVersion.withHeaders(sandboxHeader))
         status(result) mustBe 400
       }
     }

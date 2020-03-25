@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,12 @@ import java.time.Instant
 import play.api.libs.json.Json.format
 import play.api.libs.json.OFormat
 
-case class AppState(state: State, endDate: Option[Instant])
+case class AppState(
+  state:   State,
+  endDate: Option[Instant])
+
 object AppState {
+
   implicit val appState: OFormat[AppState] = {
     format[AppState]
   }

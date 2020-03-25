@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,12 @@ package uk.gov.hmrc.mobileversioncheck.domain
 import play.api.libs.json.Json.format
 import play.api.libs.json.OFormat
 
-case class PreFlightCheckResponse(upgradeRequired: Boolean, appState: Option[AppState])
+case class PreFlightCheckResponse(
+  upgradeRequired: Boolean,
+  appState:        Option[AppState])
 
 object PreFlightCheckResponse {
+
   implicit val preFlightCheckResponseFmt: OFormat[PreFlightCheckResponse] = {
     format[PreFlightCheckResponse]
   }

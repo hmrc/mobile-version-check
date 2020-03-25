@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,19 +28,22 @@ class ValidateAppVersionSpec extends PlaySpec with ScalaFutures {
   val ngcService = "ngc"
   val rdsService = "rds"
 
-  def validateAppVersion(iosVersionRange: String = "[0.0.1,)", androidVersionRange: String = "[0.0.1,)"): ValidateAppVersion =
+  def validateAppVersion(
+    iosVersionRange:     String = "[0.0.1,)",
+    androidVersionRange: String = "[0.0.1,)"
+  ): ValidateAppVersion =
     new ValidateAppVersion {
       override lazy val config: Config = ConfigFactory.parseString(s"""approvedAppVersions {
-         |  ngc {
-         |    ios = "$iosVersionRange"
-         |    android = "$androidVersionRange"
-         |    }
-         |  rds {
-         |    ios = "$iosVersionRange"
-         |    android = "$androidVersionRange"
-         |    }
-         |}
-         | """.stripMargin)
+                                                                      |  ngc {
+                                                                      |    ios = "$iosVersionRange"
+                                                                      |    android = "$androidVersionRange"
+                                                                      |    }
+                                                                      |  rds {
+                                                                      |    ios = "$iosVersionRange"
+                                                                      |    android = "$androidVersionRange"
+                                                                      |    }
+                                                                      |}
+                                                                      | """.stripMargin)
     }
 
   val scenarios = Table(
@@ -64,7 +67,9 @@ class ValidateAppVersionSpec extends PlaySpec with ScalaFutures {
     }
     s"upgrade required for Android app version 1.0.0 valid $testName" in {
       val deviceVersion = DeviceVersion(Android, "1.0.0")
-      validateAppVersion(androidVersionRange = "[1.2.0,1.3.0]").upgrade(deviceVersion, callingService).futureValue mustBe true
+      validateAppVersion(androidVersionRange = "[1.2.0,1.3.0]")
+        .upgrade(deviceVersion, callingService)
+        .futureValue mustBe true
     }
   }
 }

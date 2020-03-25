@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,17 +56,17 @@ class VersionSpec extends FlatSpec with Matchers {
   }
 
   "Unsupported version schemas" should "transformed into qualifiers" in {
-    Version("1.0.1b") shouldBe Version(0, 0, 0, Some("1.0.1b"))
-    Version("1.0M2") shouldBe Version(0, 0, 0, Some("1.0M2"))
-    Version("1.0RC2") shouldBe Version(0, 0, 0, Some("1.0RC2"))
-    Version("1.7.3.0") shouldBe Version(0, 0, 0, Some("1.7.3.0"))
-    Version("1.7.3.0-1") shouldBe Version(0, 0, 0, Some("1.7.3.0-1"))
-    Version("PATCH-1193602") shouldBe Version(0, 0, 0, Some("PATCH-1193602"))
+    Version("1.0.1b")                shouldBe Version(0, 0, 0, Some("1.0.1b"))
+    Version("1.0M2")                 shouldBe Version(0, 0, 0, Some("1.0M2"))
+    Version("1.0RC2")                shouldBe Version(0, 0, 0, Some("1.0RC2"))
+    Version("1.7.3.0")               shouldBe Version(0, 0, 0, Some("1.7.3.0"))
+    Version("1.7.3.0-1")             shouldBe Version(0, 0, 0, Some("1.7.3.0-1"))
+    Version("PATCH-1193602")         shouldBe Version(0, 0, 0, Some("PATCH-1193602"))
     Version("5.0.0alpha-2006020117") shouldBe Version(0, 0, 0, Some("5.0.0alpha-2006020117"))
-    Version("1.0.0.-SNAPSHOT") shouldBe Version(0, 0, 0, Some("1.0.0.-SNAPSHOT"))
-    Version("1..0-SNAPSHOT") shouldBe Version(0, 0, 0, Some("1..0-SNAPSHOT"))
-    Version("1.0.-SNAPSHOT") shouldBe Version(0, 0, 0, Some("1.0.-SNAPSHOT"))
-    Version(".1.0-SNAPSHOT") shouldBe Version(0, 0, 0, Some(".1.0-SNAPSHOT"))
+    Version("1.0.0.-SNAPSHOT")       shouldBe Version(0, 0, 0, Some("1.0.0.-SNAPSHOT"))
+    Version("1..0-SNAPSHOT")         shouldBe Version(0, 0, 0, Some("1..0-SNAPSHOT"))
+    Version("1.0.-SNAPSHOT")         shouldBe Version(0, 0, 0, Some("1.0.-SNAPSHOT"))
+    Version(".1.0-SNAPSHOT")         shouldBe Version(0, 0, 0, Some(".1.0-SNAPSHOT"))
   }
 
   "1.0.0" should "be greater than 0.0.1" in {
@@ -96,7 +96,6 @@ class VersionSpec extends FlatSpec with Matchers {
   "Version comparison" should "work for '1.0-alpha-1' < 1.0" in {
     Version("1.0-alpha-1").isBefore(Version("1.0")) shouldBe true
   }
-
 
   it should "work for '1.0-alpha-1' < 1.0-alpha-2" in {
     Version("1.0-alpha-1").isBefore(Version("1.0-alpha-2")) shouldBe true
@@ -160,12 +159,14 @@ class VersionSpec extends FlatSpec with Matchers {
     Version("2.3.0-v200706262000").isBefore(Version("2.3.0-v200706262130")) shouldBe true
   }
   it should "work for '2.0.0.v200706041905-7C78EK9E_EkMNfNOd2d8qq' < 2.0.0.v200706041906-7C78EK9E_EkMNfNOd2d8qq" in {
-    Version("2.0.0.v200706041905-7C78EK9E_EkMNfNOd2d8qq").isBefore(Version("2.0.0.v200706041906-7C78EK9E_EkMNfNOd2d8qq")) shouldBe true
+    Version("2.0.0.v200706041905-7C78EK9E_EkMNfNOd2d8qq").isBefore(
+      Version("2.0.0.v200706041906-7C78EK9E_EkMNfNOd2d8qq")
+    ) shouldBe true
   }
 
   "Version" should "recognise an early release" in {
     Version.isSnapshot(Version(2, 2, 3, Some(Right("SNAPSHOT")))) shouldBe true
-    Version.isSnapshot(Version(2, 2, 2)) shouldBe false
+    Version.isSnapshot(Version(2, 2, 2))                          shouldBe false
   }
 
   it should "recognise '*-SNAP1' as a snapshot" in {
