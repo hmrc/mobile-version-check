@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,17 @@ import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.{Android, iOS}
 
 import scala.concurrent.Future
 
-case class NativeVersion(ios: VersionRange, android: VersionRange)
+case class NativeVersion(
+  ios:     VersionRange,
+  android: VersionRange)
 
 trait ValidateAppVersion {
   def config: Config
 
-  def upgrade(deviceVersion: DeviceVersion, service: String): Future[Boolean] = {
+  def upgrade(
+    deviceVersion: DeviceVersion,
+    service:       String
+  ): Future[Boolean] = {
 
     val appVersion: NativeVersion = service match {
       case "rds" => {

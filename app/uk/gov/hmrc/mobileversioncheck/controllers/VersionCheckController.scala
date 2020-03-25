@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,18 +26,19 @@ import play.api.mvc._
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.domain._
-import uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes
-import uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes.{JourneyId, Service}
+import uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobileversioncheck.service.VersionCheckService
 import uk.gov.hmrc.play.bootstrap.controller.{BackendBaseController, BackendController}
 
 import scala.concurrent.{ExecutionContext, Future}
-import eu.timepit.refined.refineMV
 
 trait VersionCheckController extends BackendBaseController with HeaderValidator {
   implicit def executionContext: ExecutionContext
 
-  def versionCheck(journeyId: JourneyId, service: String): Action[JsValue] =
+  def versionCheck(
+    journeyId: JourneyId,
+    service:   String
+  ): Action[JsValue] =
     validateAccept(acceptHeaderValidationRules).async(controllerComponents.parsers.json) { implicit request =>
       request.body
         .validate[DeviceVersion]
@@ -46,19 +47,21 @@ trait VersionCheckController extends BackendBaseController with HeaderValidator 
             Logger.warn("Received error with service validate app version: " + errors)
             Future.successful(BadRequest(JsError.toJson(errors)))
           },
-          deviceVersion => {
-            doVersionCheck(deviceVersion, journeyId, service.toLowerCase)
-          }
+          deviceVersion => doVersionCheck(deviceVersion, journeyId, service.toLowerCase)
         )
     }
 
-  def doVersionCheck(deviceVersion: DeviceVersion, journeyId: JourneyId, service: String)(
-    implicit hc:                    HeaderCarrier,
-    request:                        Request[_]): Future[Result]
+  def doVersionCheck(
+    deviceVersion: DeviceVersion,
+    journeyId:     JourneyId,
+    service:       String
+  )(implicit hc:   HeaderCarrier,
+    request:       Request[_]
+  ): Future[Result]
 }
 
 @Singleton
-class LiveVersionCheckController @Inject()(
+class LiveVersionCheckController @Inject() (
   val service:                   VersionCheckService,
   cc:                            ControllerComponents
 )(implicit val executionContext: ExecutionContext)
@@ -66,9 +69,13 @@ class LiveVersionCheckController @Inject()(
     with VersionCheckController {
   override def parser: BodyParser[AnyContent] = cc.parsers.anyContent
 
-  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: JourneyId, callingService: String)(
-    implicit hc:                             HeaderCarrier,
-    request:                                 Request[_]): Future[Result] =
+  override def doVersionCheck(
+    deviceVersion:  DeviceVersion,
+    journeyId:      JourneyId,
+    callingService: String
+  )(implicit hc:    HeaderCarrier,
+    request:        Request[_]
+  ): Future[Result] =
     for {
       upgradeRequired <- service.versionCheck(deviceVersion, journeyId, callingService)
       appState        <- service.appState(callingService, deviceVersion)
@@ -78,17 +85,20 @@ class LiveVersionCheckController @Inject()(
 }
 
 @Singleton
-class SandboxVersionCheckController @Inject()(
-  cc: ControllerComponents
-)(
-  implicit val executionContext: ExecutionContext
-) extends BackendController(cc)
+class SandboxVersionCheckController @Inject() (
+  cc:                            ControllerComponents
+)(implicit val executionContext: ExecutionContext)
+    extends BackendController(cc)
     with VersionCheckController {
   override def parser: BodyParser[AnyContent] = cc.parsers.anyContent
 
-  override def doVersionCheck(deviceVersion: DeviceVersion, journeyId: JourneyId, callingService: String)(
-    implicit hc:                             HeaderCarrier,
-    request:                                 Request[_]): Future[Result] = {
+  override def doVersionCheck(
+    deviceVersion:  DeviceVersion,
+    journeyId:      JourneyId,
+    callingService: String
+  )(implicit hc:    HeaderCarrier,
+    request:        Request[_]
+  ): Future[Result] = {
 
     val result: Result = (callingService, request.headers.get("SANDBOX-CONTROL")) match {
       case (_, Some("ERROR-500")) => InternalServerError
@@ -98,19 +108,24 @@ class SandboxVersionCheckController @Inject()(
             PreFlightCheckResponse(
               upgradeRequired = true,
               Some(AppState(ACTIVE, None))
-            )))
+            )
+          )
+        )
       case (_, Some("UPGRADE-REQUIRED")) =>
         Ok(
           Json.toJson(
             PreFlightCheckResponse(upgradeRequired = true, None)
-          ))
+          )
+        )
       case ("rds", Some("INACTIVE-APPSTATE")) =>
         Ok(
           Json.toJson(
             PreFlightCheckResponse(
               upgradeRequired = false,
               Some(AppState(INACTIVE, Some(Instant.parse("2019-11-01T00:00:00Z"))))
-            )))
+            )
+          )
+        )
       case ("ngc", Some("INACTIVE-APPSTATE"))  => InternalServerError
       case ("ngc", Some("SHUTTERED-APPSTATE")) => InternalServerError
       case ("rds", Some("SHUTTERED-APPSTATE")) =>
@@ -119,14 +134,18 @@ class SandboxVersionCheckController @Inject()(
             PreFlightCheckResponse(
               upgradeRequired = false,
               Some(AppState(SHUTTERED, Some(Instant.parse("2020-01-01T00:00:00Z"))))
-            )))
+            )
+          )
+        )
       case _ =>
         Ok(
           Json.toJson(
             PreFlightCheckResponse(
               upgradeRequired = false,
               Some(AppState(ACTIVE, None))
-            )))
+            )
+          )
+        )
     }
 
     Future successful result

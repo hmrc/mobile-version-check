@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,9 @@ case object INACTIVE extends State { val value  = "INACTIVE" }
 case object SHUTTERED extends State { val value = "SHUTTERED" }
 
 object State {
+
   val reads: Reads[State] = new Reads[State] {
+
     override def reads(json: JsValue): JsResult[State] = json.as[String].toUpperCase match {
       case "ACTIVE"    => JsSuccess(ACTIVE)
       case "INACTIVE"  => JsSuccess(INACTIVE)
@@ -35,6 +37,7 @@ object State {
   }
 
   val writes: Writes[State] = new Writes[State] {
+
     override def writes(state: State): JsString = state match {
       case ACTIVE    => JsString("ACTIVE")
       case SHUTTERED => JsString("SHUTTERED")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,21 @@ class LiveVersionCheckControllerSpec extends BaseControllerSpec {
   val service: VersionCheckService = mock[VersionCheckService]
   val controller = new LiveVersionCheckController(service, stubControllerComponents())
 
-  def mockServiceCall(upgradeRequired: Boolean, optionalJourneyId: Option[JourneyId], deviceVersion: DeviceVersion = iOSVersion): Unit =
+  def mockServiceCall(
+    upgradeRequired:   Boolean,
+    optionalJourneyId: Option[JourneyId],
+    deviceVersion:     DeviceVersion = iOSVersion
+  ): Unit =
     (service
       .versionCheck(_: DeviceVersion, _: JourneyId, _: String)(_: HeaderCarrier, _: ExecutionContext))
       .expects(deviceVersion, journeyId, *, *, *)
       .returning(Future successful upgradeRequired)
 
-  def mockAppStateCall(appState: Option[AppState], callingService: String, deviceVersion: DeviceVersion = iOSVersion): Unit =
+  def mockAppStateCall(
+    appState:       Option[AppState],
+    callingService: String,
+    deviceVersion:  DeviceVersion = iOSVersion
+  ): Unit =
     (service
       .appState(_: String, _: DeviceVersion)(_: HeaderCarrier, _: ExecutionContext))
       .expects(callingService, deviceVersion, *, *)
@@ -99,7 +107,9 @@ class LiveVersionCheckControllerSpec extends BaseControllerSpec {
       mockServiceCall(upgradeRequired                              = true, None, androidVersion)
       mockAppStateCall(openAppState, callingService, deviceVersion = androidVersion)
 
-      val result = controller.versionCheck(journeyId, callingService)(FakeRequest().withBody(toJson(androidVersion)).withHeaders(acceptJsonHeader))
+      val result = controller.versionCheck(journeyId, callingService)(
+        FakeRequest().withBody(toJson(androidVersion)).withHeaders(acceptJsonHeader)
+      )
 
       status(result) mustBe 200
       contentAsJson(result) mustBe parse(upgradeRequiredResultRds)

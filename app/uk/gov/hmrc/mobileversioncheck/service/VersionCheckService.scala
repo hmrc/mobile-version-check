@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,18 @@ import uk.gov.hmrc.service.Auditor
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class VersionCheckService @Inject()(val configuration: Configuration, val auditConnector: AuditConnector) extends Auditor {
+class VersionCheckService @Inject() (
+  val configuration:  Configuration,
+  val auditConnector: AuditConnector)
+    extends Auditor {
 
-  def versionCheck(deviceVersion: DeviceVersion, journeyId: JourneyId, service: String)(
-    implicit hc:                  HeaderCarrier,
-    ex:                           ExecutionContext): Future[Boolean] =
+  def versionCheck(
+    deviceVersion: DeviceVersion,
+    journeyId:     JourneyId,
+    service:       String
+  )(implicit hc:   HeaderCarrier,
+    ex:            ExecutionContext
+  ): Future[Boolean] =
     withAudit("upgradeRequired", Map("os" -> deviceVersion.os.toString)) {
       ValidateAppVersion.upgrade(deviceVersion, service)
     }
@@ -52,7 +59,12 @@ class VersionCheckService @Inject()(val configuration: Configuration, val auditC
     if (dateString.isEmpty) None else Some(Instant.parse(dateString))
   }
 
-  def appState(service: String, deviceVersion: DeviceVersion)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Option[AppState]] =
+  def appState(
+    service:       String,
+    deviceVersion: DeviceVersion
+  )(implicit hc:   HeaderCarrier,
+    ex:            ExecutionContext
+  ): Future[Option[AppState]] =
     withAudit("appState", Map("os" -> deviceVersion.os.toString)) {
       service match {
         case "rds" =>
@@ -61,7 +73,9 @@ class VersionCheckService @Inject()(val configuration: Configuration, val auditC
               AppState(
                 state   = configState(s"$service.state"),
                 endDate = configEndDate(s"$service.endDate")
-              )))
+              )
+            )
+          )
         case _ => Future.successful(None)
       }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.mobileversioncheck
 
+import eu.timepit.refined.auto._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
@@ -23,7 +24,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.iOS
 import uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes.JourneyId
-import eu.timepit.refined.auto._
 
 trait BaseSpec extends PlaySpec with MockFactory with ScalaFutures {
   implicit lazy val hc: HeaderCarrier = HeaderCarrier()
