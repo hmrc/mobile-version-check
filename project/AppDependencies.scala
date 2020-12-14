@@ -4,23 +4,23 @@ import sbt._
 
 object AppDependencies {
 
-  private val bootstrapPlayVersion     = "1.3.0"
+  private val bootstrapPlayVersion     = "3.0.0"
   private val playHmrcVersion          = "4.1.0-play-26"
   private val scalatestPlusPlayVersion = "3.1.2"
 
   private val scalaMockVersion       = "4.1.0"
   private val pegdownVersion         = "1.6.0"
   private val integrationTestVersion = "0.10.0-play-26"
-  private val cucumberJunitVersion   = "1.2.5"
-  private val cucumberScalaVersion   = "1.2.5"
-  private val wiremockVersion        = "2.21.0"
-  private val refinedVersion         = "0.9.4"
+  private val cucumberJunitVersion   = "1.2.6"
+  private val cucumberScalaVersion   = "1.2.6"
+  private val wiremockVersion        = "2.27.2"
+  private val refinedVersion         = "0.9.19"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-play-26" % bootstrapPlayVersion,
-    "uk.gov.hmrc" %% "play-hmrc-api"     % playHmrcVersion,
-    "eu.timepit"  %% "refined"           % refinedVersion
+    "uk.gov.hmrc" %% "bootstrap-backend-play-26" % bootstrapPlayVersion,
+    "uk.gov.hmrc" %% "play-hmrc-api"             % playHmrcVersion,
+    "eu.timepit"  %% "refined"                   % refinedVersion
   )
 
   trait TestDependencies {
@@ -29,8 +29,10 @@ object AppDependencies {
   }
 
   object Test {
+
     def apply(): Seq[ModuleID] =
       new TestDependencies {
+
         override lazy val test: Seq[ModuleID] = Seq(
           "org.scalatestplus.play" %% "scalatestplus-play" % scalatestPlusPlayVersion % scope,
           "org.scalamock"          %% "scalamock"          % scalaMockVersion         % scope,
@@ -40,6 +42,7 @@ object AppDependencies {
   }
 
   object IntegrationTest {
+
     def apply(): Seq[ModuleID] =
       new TestDependencies {
 
@@ -60,6 +63,7 @@ object AppDependencies {
     // compatible with wiremock, so we need to pin the jetty stuff to the older version.
     // see https://groups.google.com/forum/#!topic/play-framework/HAIM1ukUCnI
     val jettyVersion = "9.2.13.v20150730"
+
     def overrides(): Seq[ModuleID] = Seq(
       "org.eclipse.jetty"           % "jetty-server"       % jettyVersion,
       "org.eclipse.jetty"           % "jetty-servlet"      % jettyVersion,

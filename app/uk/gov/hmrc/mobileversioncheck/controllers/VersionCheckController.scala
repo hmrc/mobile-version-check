@@ -17,8 +17,8 @@
 package uk.gov.hmrc.mobileversioncheck.controllers
 
 import java.time.Instant
-
 import com.google.inject.Singleton
+
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.{JsError, JsValue, Json}
@@ -28,11 +28,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.domain._
 import uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobileversioncheck.service.VersionCheckService
-import uk.gov.hmrc.play.bootstrap.controller.{BackendBaseController, BackendController}
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait VersionCheckController extends BackendBaseController with HeaderValidator {
+trait VersionCheckController extends BackendController with HeaderValidator {
   implicit def executionContext: ExecutionContext
 
   def versionCheck(

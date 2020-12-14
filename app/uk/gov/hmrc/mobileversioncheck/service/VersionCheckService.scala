@@ -17,23 +17,22 @@
 package uk.gov.hmrc.mobileversioncheck.service
 
 import java.time.Instant
-
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
+import play.api.libs.json.Json.obj
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.domain._
 import uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.{DataEvent, ExtendedDataEvent}
 import uk.gov.hmrc.play.bootstrap.config.AppName
-import uk.gov.hmrc.service.Auditor
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class VersionCheckService @Inject() (
   val configuration:  Configuration,
-  val auditConnector: AuditConnector)
-    extends Auditor {
+  val auditConnector: AuditConnector) {
 
   def versionCheck(
     deviceVersion: DeviceVersion,
@@ -41,10 +40,10 @@ class VersionCheckService @Inject() (
     service:       String
   )(implicit hc:   HeaderCarrier,
     ex:            ExecutionContext
-  ): Future[Boolean] =
-    withAudit("upgradeRequired", Map("os" -> deviceVersion.os.toString)) {
-      ValidateAppVersion.upgrade(deviceVersion, service)
-    }
+  ): Future[Boolean] = {
+    sendAuditEvent("upgradeRequired", deviceVersion.os.toString)
+    ValidateAppVersion.upgrade(deviceVersion, service)
+  }
 
   private def configState(path: String): State =
     configuration.getOptional[String](path) match {
@@ -64,22 +63,39 @@ class VersionCheckService @Inject() (
     deviceVersion: DeviceVersion
   )(implicit hc:   HeaderCarrier,
     ex:            ExecutionContext
-  ): Future[Option[AppState]] =
-    withAudit("appState", Map("os" -> deviceVersion.os.toString)) {
-      service match {
-        case "rds" =>
-          Future.successful(
-            Some(
-              AppState(
-                state   = configState(s"$service.state"),
-                endDate = configEndDate(s"$service.endDate")
-              )
+  ): Future[Option[AppState]] = {
+    sendAuditEvent("appState", deviceVersion.os.toString)
+    service match {
+      case "rds" =>
+        Future.successful(
+          Some(
+            AppState(
+              state   = configState(s"$service.state"),
+              endDate = configEndDate(s"$service.endDate")
             )
           )
-        case _ => Future.successful(None)
-      }
-
+        )
+      case _ => Future.successful(None)
     }
 
-  override def appName: String = AppName.fromConfiguration(configuration)
+  }
+
+  private def sendAuditEvent(
+    transactionName: String,
+    deviceOs:        String
+  )(implicit hc:     HeaderCarrier,
+    ex:              ExecutionContext
+  ): Unit = {
+    auditConnector.sendEvent(
+      DataEvent(
+        AppName.fromConfiguration(configuration),
+        "ServiceResponseSent",
+        tags = Map("transactionName" -> transactionName),
+        detail = Map(
+          "os" -> deviceOs
+        )
+      )
+    )
+    ()
+  }
 }

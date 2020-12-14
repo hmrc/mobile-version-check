@@ -17,7 +17,6 @@
 package uk.gov.hmrc.mobileversioncheck.service
 
 import java.time.Instant
-
 import org.scalamock.handlers.CallHandler3
 import org.scalamock.matchers.MatcherBase
 import org.scalatest.prop.TableDrivenPropertyChecks.forAll
