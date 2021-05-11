@@ -19,12 +19,11 @@ package uk.gov.hmrc.mobileversioncheck.service
 import java.time.Instant
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
-import play.api.libs.json.Json.obj
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.domain._
 import uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.audit.model.{DataEvent, ExtendedDataEvent}
+import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.bootstrap.config.AppName
 
 import scala.concurrent.{ExecutionContext, Future}

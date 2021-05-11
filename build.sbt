@@ -1,20 +1,21 @@
 import play.sbt.PlayImport.PlayKeys.playDefaultPort
 import sbt.Tests.{Group, SubProcess}
 import uk.gov.hmrc.DefaultBuildSettings.addTestReportOption
-import uk.gov.hmrc.SbtArtifactory
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 val appName = "mobile-version-check"
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory, ScoverageSbtPlugin)
+  .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin, ScoverageSbtPlugin)
+  .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     majorVersion := 0,
     scalaVersion := "2.12.8",
     playDefaultPort := 8244,
     libraryDependencies ++= AppDependencies(),
     dependencyOverrides ++= AppDependencies.overrides(),
-    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(warnScalaVersionEviction = false),
+    evictionWarningOptions in update := EvictionWarningOptions.default
+      .withWarnScalaVersionEviction(warnScalaVersionEviction = false),
     coverageMinimum := 90,
     coverageFailOnMinimum := true,
     coverageHighlighting := true,
@@ -24,7 +25,8 @@ lazy val microservice = Project(appName, file("."))
     publishingSettings: _*
   )
   .settings(
-    routesImport ++= Seq("uk.gov.hmrc.mobileversioncheck.domain.types._", "uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes._")
+    routesImport ++= Seq("uk.gov.hmrc.mobileversioncheck.domain.types._",
+                         "uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes._")
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)

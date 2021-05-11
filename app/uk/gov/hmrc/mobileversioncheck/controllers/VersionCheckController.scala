@@ -35,6 +35,8 @@ import scala.concurrent.{ExecutionContext, Future}
 trait VersionCheckController extends BackendController with HeaderValidator {
   implicit def executionContext: ExecutionContext
 
+  val logger: Logger = Logger(this.getClass)
+
   def versionCheck(
     journeyId: JourneyId,
     service:   String
@@ -44,7 +46,7 @@ trait VersionCheckController extends BackendController with HeaderValidator {
         .validate[DeviceVersion]
         .fold(
           errors => {
-            Logger.warn("Received error with service validate app version: " + errors)
+            logger.warn("Received error with service validate app version: " + errors)
             Future.successful(BadRequest(JsError.toJson(errors)))
           },
           deviceVersion => doVersionCheck(deviceVersion, journeyId, service.toLowerCase)
