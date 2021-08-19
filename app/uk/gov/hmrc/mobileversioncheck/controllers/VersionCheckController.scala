@@ -80,9 +80,8 @@ class LiveVersionCheckController @Inject() (
   ): Future[Result] =
     for {
       upgradeRequired <- service.versionCheck(deviceVersion, journeyId, callingService)
-      appState        <- service.appState(callingService, deviceVersion)
     } yield {
-      Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired, appState)))
+      Ok(Json.toJson(PreFlightCheckResponse(upgradeRequired)))
     }
 }
 
@@ -104,47 +103,17 @@ class SandboxVersionCheckController @Inject() (
 
     val result: Result = (callingService, request.headers.get("SANDBOX-CONTROL")) match {
       case (_, Some("ERROR-500")) => InternalServerError
-      case ("rds", Some("UPGRADE-REQUIRED")) =>
-        Ok(
-          Json.toJson(
-            PreFlightCheckResponse(
-              upgradeRequired = true,
-              Some(AppState(ACTIVE, None))
-            )
-          )
-        )
       case (_, Some("UPGRADE-REQUIRED")) =>
         Ok(
           Json.toJson(
-            PreFlightCheckResponse(upgradeRequired = true, None)
-          )
-        )
-      case ("rds", Some("INACTIVE-APPSTATE")) =>
-        Ok(
-          Json.toJson(
-            PreFlightCheckResponse(
-              upgradeRequired = false,
-              Some(AppState(INACTIVE, Some(Instant.parse("2019-11-01T00:00:00Z"))))
-            )
-          )
-        )
-      case ("ngc", Some("INACTIVE-APPSTATE"))  => InternalServerError
-      case ("ngc", Some("SHUTTERED-APPSTATE")) => InternalServerError
-      case ("rds", Some("SHUTTERED-APPSTATE")) =>
-        Ok(
-          Json.toJson(
-            PreFlightCheckResponse(
-              upgradeRequired = false,
-              Some(AppState(SHUTTERED, Some(Instant.parse("2020-01-01T00:00:00Z"))))
-            )
+            PreFlightCheckResponse(upgradeRequired = true)
           )
         )
       case _ =>
         Ok(
           Json.toJson(
             PreFlightCheckResponse(
-              upgradeRequired = false,
-              Some(AppState(ACTIVE, None))
+              upgradeRequired = false
             )
           )
         )

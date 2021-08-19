@@ -9,7 +9,6 @@ import uk.gov.hmrc.mobileversioncheck.domain._
 import uk.gov.hmrc.mobileversioncheck.support.BaseISpec
 
 class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
-  override def state: State = ACTIVE
 
   "GET /ping/ping" should {
     def request: WSRequest = wsUrl(s"/ping/ping").addHttpHeaders(acceptJsonHeader)
@@ -30,8 +29,7 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
 
   val scenarios = Table(
     ("testName", "callingService", "lowestAcceptedIosVersion", "lowestAcceptedAndroidVersion"),
-    ("As NGC Service", ngcService, "3.0.7", "5.0.22"),
-    ("As RDS Service", rdsService, "0.0.1", "0.0.1")
+    ("As NGC Service", ngcService, "3.0.7", "5.0.22")
   )
 
   forAll(scenarios) {
@@ -52,8 +50,6 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
 
           response.status                                 shouldBe 200
           (response.json \ "upgradeRequired").as[Boolean] shouldBe true
-          (response.json \ "appState").asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(ACTIVE, None)),
-                                                                                    callingService)
         }
 
         s"indicate that an upgrade is not required for a version equal to the lower bound version of iOS $testName" in {
@@ -64,8 +60,6 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
 
           response.status                                 shouldBe 200
           (response.json \ "upgradeRequired").as[Boolean] shouldBe false
-          (response.json \ "appState").asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(ACTIVE, None)),
-                                                                                    callingService)
         }
 
         s"indicate that an upgrade is not required for a version above the lower bound version of iOS $testName" in {
@@ -77,8 +71,6 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
 
           response.status                                 shouldBe 200
           (response.json \ "upgradeRequired").as[Boolean] shouldBe false
-          (response.json \ "appState").asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(ACTIVE, None)),
-                                                                                    callingService)
         }
 
         s"indicate that an upgrade is required for a version below the lower bound version of android $testName" in {
@@ -89,8 +81,6 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
 
           response.status                                 shouldBe 200
           (response.json \ "upgradeRequired").as[Boolean] shouldBe true
-          (response.json \ "appState").asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(ACTIVE, None)),
-                                                                                    callingService)
         }
 
         s"indicate that an upgrade is not required for a version equal to the lower bound version of android $testName" in {
@@ -101,8 +91,6 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
 
           response.status                                 shouldBe 200
           (response.json \ "upgradeRequired").as[Boolean] shouldBe false
-          (response.json \ "appState").asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(ACTIVE, None)),
-                                                                                    callingService)
         }
 
         s"indicate that an upgrade is not required for a version above the lower bound version of android $testName" in {
@@ -113,8 +101,6 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
 
           response.status                                 shouldBe 200
           (response.json \ "upgradeRequired").as[Boolean] shouldBe false
-          (response.json \ "appState").asOpt[AppState] shouldBe getExpectedResponse(Some(AppState(ACTIVE, None)),
-                                                                                    callingService)
         }
 
         s"return 400 BAD REQUEST if journeyId is not supplied $testName" in {

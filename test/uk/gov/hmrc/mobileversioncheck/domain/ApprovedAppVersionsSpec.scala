@@ -27,10 +27,6 @@ class ApprovedAppVersionsSpec extends WordSpecLike with Matchers {
                                           |    ios = "[0.0.1,)"
                                           |    android = "[0.0.1,)"
                                           |    }
-                                          |  rds {
-                                          |    ios = "[0.0.1,)"
-                                          |    android = "[0.0.1,)"
-                                          |    }
                                           |}
                                           | """.stripMargin)
 

@@ -46,8 +46,7 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
 
   val scenarios = Table(
     ("testName", "callingService"),
-    ("As NGC Service", ngcService),
-    ("As RDS Service", rdsService)
+    ("As NGC Service", ngcService)
   )
 
   forAll(scenarios) { (testName: String, callingService: String) =>
@@ -55,13 +54,13 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       s"return upgradeRequired false when a journey id is supplied $testName" in {
         val result = controller.versionCheck(journeyId, callingService)(iOSRequestWithValidHeaders)
         status(result) mustBe 200
-        contentAsJson(result) mustBe parse(upgradeNotRequiredResultRds)
+        contentAsJson(result) mustBe parse(upgradeNotRequiredResultNgc)
       }
 
       s"return upgradeRequired result for android OS $testName" in {
         val result = controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader)
         status(result) mustBe 200
-        contentAsJson(result) mustBe parse(upgradeNotRequiredResultRds)
+        contentAsJson(result) mustBe parse(upgradeNotRequiredResultNgc)
       }
 
       s"require the accept header $testName" in {
@@ -87,14 +86,14 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       s"return upgradeRequired false when a journey id is supplied $testName" in {
         val result = controller.versionCheck(journeyId, callingService)(iosRequestWithRandomSandboxControlHeader)
         status(result) mustBe 200
-        contentAsJson(result) mustBe parse(upgradeNotRequiredResultRds)
+        contentAsJson(result) mustBe parse(upgradeNotRequiredResultNgc)
       }
 
       s"return upgradeRequired result for android OS $testName" in {
         val result =
           controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
         status(result) mustBe 200
-        contentAsJson(result) mustBe parse(upgradeNotRequiredResultRds)
+        contentAsJson(result) mustBe parse(upgradeNotRequiredResultNgc)
       }
 
       s"require the accept header $testName" in {
@@ -153,128 +152,20 @@ class SandboxVersionCheckControllerSpec extends BaseControllerSpec {
       s"return upgradeRequired false when a journey id is supplied $testName" in {
         val result = controller.versionCheck(journeyId, callingService)(iosRequestWithRandomSandboxControlHeader)
         status(result) mustBe 200
-        contentAsJson(result) mustBe (if (callingService == "ngc") parse(upgradeRequiredResultNgc)
-                                      else parse(upgradeRequiredResultRds))
+        contentAsJson(result) mustBe parse(upgradeRequiredResultNgc)
       }
 
       s"return upgradeRequired false when no journey id is supplied $testName" in {
         val result = controller.versionCheck(journeyId, callingService)(iosRequestWithRandomSandboxControlHeader)
         status(result) mustBe 200
-        contentAsJson(result) mustBe (if (callingService == "ngc") parse(upgradeRequiredResultNgc)
-                                      else parse(upgradeRequiredResultRds))
+        contentAsJson(result) mustBe parse(upgradeRequiredResultNgc)
       }
 
       s"return upgradeRequired result for android OS $testName" in {
         val result =
           controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
         status(result) mustBe 200
-        contentAsJson(result) mustBe (if (callingService == "ngc") parse(upgradeRequiredResultNgc)
-                                      else parse(upgradeRequiredResultRds))
-      }
-
-      s"require the accept header $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(iOSRequest.withHeaders(sandboxHeader))
-        status(result) mustBe 406
-      }
-
-      s"require an app OS $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(requestWithoutOS.withHeaders(sandboxHeader))
-        status(result) mustBe 400
-      }
-
-      s"require a version $testName" in {
-        val result =
-          controller.versionCheck(journeyId, callingService)(requestWithoutVersion.withHeaders(sandboxHeader))
-        status(result) mustBe 400
-      }
-    }
-
-    s"version check with 'INACTIVE-APPSTATE' SANDBOX-CONTROL header supplied $testName" should {
-      val sandboxHeader                            = sandboxControlHeader -> "INACTIVE-APPSTATE"
-      val iosRequestWithRandomSandboxControlHeader = iOSRequestWithValidHeaders.withHeaders(sandboxHeader)
-
-      s"return upgradeRequired false when a journey id is supplied $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(iosRequestWithRandomSandboxControlHeader)
-        if (callingService == "ngc") {
-          status(result) mustBe 500
-        } else {
-          status(result) mustBe 200
-          contentAsJson(result) mustBe parse(upgradeNotRequiredPreliveResultRds)
-        }
-      }
-
-      s"return upgradeRequired false when no journey id is supplied $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(iosRequestWithRandomSandboxControlHeader)
-
-        if (callingService == "ngc") {
-          status(result) mustBe 500
-        } else {
-          status(result) mustBe 200
-          contentAsJson(result) mustBe parse(upgradeNotRequiredPreliveResultRds)
-        }
-      }
-
-      s"return upgradeRequired result for android OS $testName" in {
-        val result =
-          controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
-        if (callingService == "ngc") {
-          status(result) mustBe 500
-        } else {
-          status(result) mustBe 200
-          contentAsJson(result) mustBe parse(upgradeNotRequiredPreliveResultRds)
-        }
-      }
-
-      s"require the accept header $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(iOSRequest.withHeaders(sandboxHeader))
-        status(result) mustBe 406
-      }
-
-      s"require an app OS $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(requestWithoutOS.withHeaders(sandboxHeader))
-        status(result) mustBe 400
-      }
-
-      s"require a version $testName" in {
-        val result =
-          controller.versionCheck(journeyId, callingService)(requestWithoutVersion.withHeaders(sandboxHeader))
-        status(result) mustBe 400
-      }
-    }
-
-    s"version check with 'SHUTTERED-APPSTATE' SANDBOX-CONTROL header supplied $testName" should {
-      val sandboxHeader                            = sandboxControlHeader -> "SHUTTERED-APPSTATE"
-      val iosRequestWithRandomSandboxControlHeader = iOSRequestWithValidHeaders.withHeaders(sandboxHeader)
-
-      s"return upgradeRequired false when a journey id is supplied $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(iosRequestWithRandomSandboxControlHeader)
-        if (callingService == "ngc") {
-          status(result) mustBe 500
-        } else {
-          status(result) mustBe 200
-          contentAsJson(result) mustBe parse(upgradeNotRequiredEmergencyResultRds)
-        }
-      }
-
-      s"return upgradeRequired false when no journey id is supplied $testName" in {
-        val result = controller.versionCheck(journeyId, callingService)(iosRequestWithRandomSandboxControlHeader)
-        if (callingService == "ngc") {
-          status(result) mustBe 500
-        } else {
-          status(result) mustBe 200
-          contentAsJson(result) mustBe parse(upgradeNotRequiredEmergencyResultRds)
-        }
-      }
-
-      s"return upgradeRequired result for android OS $testName" in {
-        val result =
-          controller.versionCheck(journeyId, callingService)(androidRequestWithAcceptHeader.withHeaders(sandboxHeader))
-        if (callingService == "ngc") {
-          status(result) mustBe 500
-        } else {
-          status(result) mustBe 200
-          contentAsJson(result) mustBe parse(upgradeNotRequiredEmergencyResultRds)
-        }
+        contentAsJson(result) mustBe parse(upgradeRequiredResultNgc)
       }
 
       s"require the accept header $testName" in {

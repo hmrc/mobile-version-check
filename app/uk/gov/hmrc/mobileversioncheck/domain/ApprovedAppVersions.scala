@@ -36,16 +36,6 @@ trait ValidateAppVersion {
   ): Future[Boolean] = {
 
     val appVersion: NativeVersion = service match {
-      case "rds" => {
-        implicit val nativeVersionReader: ValueReader[NativeVersion] = ValueReader.relative { _ =>
-          NativeVersion(
-            VersionRange(config.as[String]("approvedAppVersions.rds.ios")),
-            VersionRange(config.as[String]("approvedAppVersions.rds.android"))
-          )
-        }
-        config.as[NativeVersion]("approvedAppVersions.rds")
-      }
-
       case "ngc" => {
         implicit val nativeVersionReader: ValueReader[NativeVersion] = ValueReader.relative { _ =>
           NativeVersion(
