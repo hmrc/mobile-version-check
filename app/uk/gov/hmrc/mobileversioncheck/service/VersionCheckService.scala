@@ -44,41 +44,6 @@ class VersionCheckService @Inject() (
     ValidateAppVersion.upgrade(deviceVersion, service)
   }
 
-  private def configState(path: String): State =
-    configuration.getOptional[String](path) match {
-      case Some(ACTIVE.value)    => ACTIVE
-      case Some(INACTIVE.value)  => INACTIVE
-      case Some(SHUTTERED.value) => SHUTTERED
-      case _                     => throw new IllegalStateException("Invalid State in config")
-    }
-
-  private def configEndDate(path: String): Option[Instant] = {
-    val dateString = configuration.get[String](path)
-    if (dateString.isEmpty) None else Some(Instant.parse(dateString))
-  }
-
-  def appState(
-    service:       String,
-    deviceVersion: DeviceVersion
-  )(implicit hc:   HeaderCarrier,
-    ex:            ExecutionContext
-  ): Future[Option[AppState]] = {
-    sendAuditEvent("appState", deviceVersion.os.toString)
-    service match {
-      case "rds" =>
-        Future.successful(
-          Some(
-            AppState(
-              state   = configState(s"$service.state"),
-              endDate = configEndDate(s"$service.endDate")
-            )
-          )
-        )
-      case _ => Future.successful(None)
-    }
-
-  }
-
   private def sendAuditEvent(
     transactionName: String,
     deviceOs:        String

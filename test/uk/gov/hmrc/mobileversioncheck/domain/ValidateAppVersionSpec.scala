@@ -26,7 +26,6 @@ import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.{Android, iOS}
 class ValidateAppVersionSpec extends PlaySpec with ScalaFutures {
 
   val ngcService = "ngc"
-  val rdsService = "rds"
 
   def validateAppVersion(
     iosVersionRange:     String = "[0.0.1,)",
@@ -38,18 +37,13 @@ class ValidateAppVersionSpec extends PlaySpec with ScalaFutures {
                                                                       |    ios = "$iosVersionRange"
                                                                       |    android = "$androidVersionRange"
                                                                       |    }
-                                                                      |  rds {
-                                                                      |    ios = "$iosVersionRange"
-                                                                      |    android = "$androidVersionRange"
-                                                                      |    }
                                                                       |}
                                                                       | """.stripMargin)
     }
 
   val scenarios = Table(
     ("testName", "callingService"),
-    ("As NGC Service", ngcService),
-    ("As RDS Service", rdsService)
+    ("As NGC Service", ngcService)
   )
 
   forAll(scenarios) { (testName: String, callingService: String) =>

@@ -30,5 +30,4 @@ trait BaseSpec extends PlaySpec with MockFactory with ScalaFutures {
   val iOSVersion = DeviceVersion(iOS, "0.1")
   val journeyId: JourneyId = "dd1ebd2e-7156-47c7-842b-8308099c5e75"
   val ngcService = "ngc"
-  val rdsService = "rds"
 }
