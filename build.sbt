@@ -10,7 +10,7 @@ lazy val microservice = Project(appName, file("."))
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     majorVersion := 0,
-    scalaVersion := "2.12.8",
+    scalaVersion := "2.12.15",
     playDefaultPort := 8244,
     libraryDependencies ++= AppDependencies(),
     dependencyOverrides ++= AppDependencies.overrides(),
