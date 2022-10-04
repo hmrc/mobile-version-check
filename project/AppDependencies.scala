@@ -11,8 +11,6 @@ object AppDependencies {
   private val scalaMockVersion       = "4.1.0"
   private val pegdownVersion         = "1.6.0"
   private val integrationTestVersion = "1.2.0-play-28"
-  private val cucumberJunitVersion   = "1.2.6"
-  private val cucumberScalaVersion   = "1.2.6"
   private val wiremockVersion        = "2.27.2"
   private val refinedVersion         = "0.9.19"
   private val flexmarkAllVersion     = "0.35.10"
@@ -55,8 +53,6 @@ object AppDependencies {
           "org.pegdown"            % "pegdown"                   % pegdownVersion           % scope,
           "uk.gov.hmrc"            %% "service-integration-test" % integrationTestVersion   % scope,
           "com.typesafe.play"      %% "play-test"                % PlayVersion.current      % scope,
-          "info.cukes"             %% "cucumber-scala"           % cucumberJunitVersion     % scope,
-          "info.cukes"             % "cucumber-junit"            % cucumberScalaVersion     % scope,
           "com.github.tomakehurst" % "wiremock"                  % wiremockVersion          % scope,
           "com.vladsch.flexmark"   % "flexmark-all"              % flexmarkAllVersion       % scope
         )
