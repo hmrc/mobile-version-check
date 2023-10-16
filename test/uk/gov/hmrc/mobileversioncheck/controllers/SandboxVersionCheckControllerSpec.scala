@@ -23,7 +23,7 @@ import org.scalatest.prop.Tables.Table
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json.{parse, toJson}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsJson, _}
+import play.api.test.Helpers._
 import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.Android
 

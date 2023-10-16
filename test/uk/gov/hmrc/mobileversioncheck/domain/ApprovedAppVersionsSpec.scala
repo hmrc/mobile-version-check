@@ -18,9 +18,10 @@ package uk.gov.hmrc.mobileversioncheck.domain
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory.parseString
-import org.scalatest.{Matchers, WordSpecLike}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
-class ApprovedAppVersionsSpec extends WordSpecLike with Matchers {
+class ApprovedAppVersionsSpec extends AnyWordSpecLike with Matchers {
 
   val specConfig: Config = parseString(s"""approvedAppVersions {
                                           |  ngc {

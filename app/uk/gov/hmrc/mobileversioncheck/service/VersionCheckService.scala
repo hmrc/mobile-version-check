@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.mobileversioncheck.service
 
-import java.time.Instant
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier

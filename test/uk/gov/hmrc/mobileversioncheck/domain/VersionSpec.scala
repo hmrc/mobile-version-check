@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.mobileversioncheck.domain
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class VersionSpec extends FlatSpec with Matchers {
+class VersionSpec extends AnyFlatSpec with Matchers {
 
   implicit def toLeft(i: Int): Left[Int, Nothing] = Left(i)
 

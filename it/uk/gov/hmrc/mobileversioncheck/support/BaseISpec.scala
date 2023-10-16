@@ -1,18 +1,17 @@
 package uk.gov.hmrc.mobileversioncheck.support
 
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.WsScalaTestClient
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.ws.WSClient
-import uk.gov.hmrc.integration.ServiceSpec
-import uk.gov.hmrc.mobileversioncheck.domain._
 
 abstract class BaseISpec
-    extends WordSpecLike
-    with ServiceSpec
+    extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with WsScalaTestClient
@@ -37,6 +36,5 @@ abstract class BaseISpec
 
   protected def appBuilder: GuiceApplicationBuilder = new GuiceApplicationBuilder().configure(config)
 
-  protected implicit lazy val wsClient: WSClient    = app.injector.instanceOf[WSClient]
-  override def externalServices:        Seq[String] = Seq()
+  protected implicit lazy val wsClient: WSClient = app.injector.instanceOf[WSClient]
 }

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.mobileversioncheck.controllers
 
-import java.time.Instant
 import com.google.inject.Singleton
 
 import javax.inject.Inject
