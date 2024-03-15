@@ -5,5 +5,3 @@ POST        /sandbox/mobile-version-check                 @uk.gov.hmrc.mobilever
 POST        /sandbox/mobile-version-check/:service        @uk.gov.hmrc.mobileversioncheck.controllers.SandboxVersionCheckController.versionCheck(journeyId: JourneyId, service: String)
 
 ->          /                                             health.Routes
-
-GET         /admin/metrics                                com.kenshoo.play.metrics.MetricsController.metrics
