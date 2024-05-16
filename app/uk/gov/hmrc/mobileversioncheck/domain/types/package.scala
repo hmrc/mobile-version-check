@@ -34,7 +34,7 @@ package object types {
     ): Option[Either[String, R[T, P]]] =
       baseTypeBinder
         .bind(key, params)
-        .map(_.right.flatMap { baseValue =>
+        .map(_.flatMap { baseValue =>
           refType.refine[P](baseValue)
         })
 
@@ -56,7 +56,7 @@ package object types {
       key:   String,
       value: String
     ): Either[String, R[T, P]] =
-      baseTypeBinder.bind(key, value).right.flatMap { baseValue =>
+      baseTypeBinder.bind(key, value).flatMap { baseValue =>
         refType.refine[P](baseValue)
       }
 

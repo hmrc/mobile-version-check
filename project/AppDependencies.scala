@@ -3,18 +3,16 @@ import sbt._
 
 object AppDependencies {
 
-  private val bootstrapPlayVersion = "7.19.0"
-  private val playHmrcVersion      = "7.2.0-play-28"
+  private val bootstrapPlayVersion = "8.5.0"
+  private val playHmrcVersion      = "8.0.0"
 
-  private val scalaMockVersion = "5.1.0"
-  private val pegdownVersion   = "1.6.0"
-  private val wiremockVersion  = "2.27.2"
-  private val refinedVersion   = "0.9.26"
+  private val scalaMockVersion = "5.2.0"
+  private val refinedVersion   = "0.11.1"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-backend-play-28" % bootstrapPlayVersion,
-    "uk.gov.hmrc" %% "play-hmrc-api"             % playHmrcVersion,
+    "uk.gov.hmrc" %% "bootstrap-backend-play-30" % bootstrapPlayVersion,
+    "uk.gov.hmrc" %% "play-hmrc-api-play-30"     % playHmrcVersion,
     "eu.timepit"  %% "refined"                   % refinedVersion
   )
 
@@ -24,8 +22,7 @@ object AppDependencies {
   }
 
   private def testCommon(scope: String) = Seq(
-    "uk.gov.hmrc" %% "bootstrap-test-play-28" % bootstrapPlayVersion % scope,
-    "org.pegdown" % "pegdown"                 % pegdownVersion       % scope
+    "uk.gov.hmrc" %% "bootstrap-test-play-30" % bootstrapPlayVersion % scope
   )
 
   object Test {
@@ -46,9 +43,7 @@ object AppDependencies {
 
         override lazy val scope: String = "it"
 
-        override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
-            "com.github.tomakehurst" % "wiremock" % wiremockVersion % scope
-          )
+        override lazy val test: Seq[ModuleID] = testCommon(scope)
       }.test
 
   }
