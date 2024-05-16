@@ -22,7 +22,7 @@ object AppDependencies {
   }
 
   private def testCommon(scope: String) = Seq(
-    "uk.gov.hmrc" %% "bootstrap-test-play-28" % bootstrapPlayVersion % scope
+    "uk.gov.hmrc" %% "bootstrap-test-play-30" % bootstrapPlayVersion % scope
   )
 
   object Test {
