@@ -1,11 +1,9 @@
 import play.sbt.PlayImport.PlayKeys.playDefaultPort
-import sbt.Tests.{Group, SubProcess}
-import uk.gov.hmrc.DefaultBuildSettings.addTestReportOption
 
 val appName = "mobile-version-check"
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin, ScoverageSbtPlugin)
+  .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin, ScoverageSbtPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     majorVersion := 0,
@@ -28,15 +26,8 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     IntegrationTest / Keys.fork := false,
     IntegrationTest / unmanagedSourceDirectories := (IntegrationTest / baseDirectory)(base => Seq(base / "it")).value,
-    IntegrationTest / testGrouping := oneForkedJvmPerTest((IntegrationTest / definedTests).value),
-    IntegrationTest / parallelExecution := false,
-    addTestReportOption(IntegrationTest, "int-test-reports")
+    IntegrationTest / parallelExecution := false
   )
   .settings(
     resolvers += Resolver.jcenterRepo
   )
-
-def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
-  tests map { test =>
-    Group(test.name, Seq(test), SubProcess(ForkOptions().withRunJVMOptions(Vector(s"-Dtest.name=${test.name}"))))
-  }
