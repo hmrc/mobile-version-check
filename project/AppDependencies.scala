@@ -3,11 +3,11 @@ import sbt._
 
 object AppDependencies {
 
-  private val bootstrapPlayVersion = "8.5.0"
+  private val bootstrapPlayVersion = "9.5.0"
   private val playHmrcVersion      = "8.0.0"
-
-  private val scalaMockVersion = "5.2.0"
-  private val refinedVersion   = "0.11.1"
+  private val scalaMockVersion     = "5.2.0"
+  private val refinedVersion       = "0.11.2"
+  private val ficusVersion         = "1.4.3"
 
   val compile: Seq[ModuleID] = Seq(
     ws,

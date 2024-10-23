@@ -28,6 +28,21 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
     version.copy(revision = version.revision + valueChange).toString
   }
 
+  "POST /mobile-version-check" should {
+    def request: WSRequest =
+      wsUrl(s"/mobile-version-check/invalidservice?journeyId=dd1ebd2e-7156-47c7-842b-8308099c5e75")
+
+    s"return 400 BAD REQUEST if service name is unrecognised" in {
+      val response = await(
+        request
+          .addHttpHeaders(acceptJsonHeader)
+          .post(toJson(DeviceVersion(Android, alterDeviceVersion("3.0.7", 1))))
+      )
+
+      response.status shouldBe 400
+    }
+  }
+
   val scenarios = Table(
     ("testName", "callingService", "lowestAcceptedIosVersion", "lowestAcceptedAndroidVersion"),
     ("As NGC Service", ngcService, "3.0.7", "5.0.22")

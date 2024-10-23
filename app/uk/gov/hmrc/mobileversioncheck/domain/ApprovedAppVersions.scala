@@ -17,8 +17,7 @@
 package uk.gov.hmrc.mobileversioncheck.domain
 
 import com.typesafe.config.Config
-import net.ceedubs.ficus.Ficus._
-import net.ceedubs.ficus.readers.ValueReader
+import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.{Android, iOS}
 
 import scala.concurrent.Future
@@ -37,16 +36,12 @@ trait ValidateAppVersion {
 
     val appVersion: NativeVersion = service match {
       case "ngc" => {
-        implicit val nativeVersionReader: ValueReader[NativeVersion] = ValueReader.relative { _ =>
-          NativeVersion(
-            VersionRange(config.as[String]("approvedAppVersions.ngc.ios")),
-            VersionRange(config.as[String]("approvedAppVersions.ngc.android"))
-          )
-        }
-        config.as[NativeVersion]("approvedAppVersions.ngc")
+        NativeVersion(
+          VersionRange(config.getString("approvedAppVersions.ngc.ios")),
+          VersionRange(config.getString("approvedAppVersions.ngc.android"))
+        )
       }
-
-      case _ => throw new IllegalStateException
+      case _ => throw new BadRequestException("Invalid service name")
     }
 
     val outsideValidRange = deviceVersion.os match {
