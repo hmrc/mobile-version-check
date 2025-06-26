@@ -28,6 +28,4 @@ lazy val microservice = Project(appName, file("."))
     IntegrationTest / unmanagedSourceDirectories := (IntegrationTest / baseDirectory)(base => Seq(base / "it")).value,
     IntegrationTest / parallelExecution := false
   )
-  .settings(
-    resolvers += Resolver.jcenterRepo
-  )
+
