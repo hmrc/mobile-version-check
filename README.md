@@ -6,6 +6,12 @@
 HMRC Mobile version Check service.
 This service can be used to determine whether an upgrade is required for a given HMRC app version.
 
+## Run Tests
+- Run Unit Tests:  `sbt test`
+- Run Integration Tests: `sbt it:test`
+- Run Unit and Integration Tests: `sbt test it:test`
+- Run Unit and Integration Tests with coverage report: `sbt clean compile coverage test it:test coverageReport dependencyUpdates`
+
 API
 ---
 

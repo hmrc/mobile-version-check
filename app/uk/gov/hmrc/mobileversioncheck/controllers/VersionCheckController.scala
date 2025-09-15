@@ -25,7 +25,7 @@ import play.api.mvc._
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.domain._
-import uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes.JourneyId
+import uk.gov.hmrc.mobileversioncheck.domain.types.JourneyId
 import uk.gov.hmrc.mobileversioncheck.service.VersionCheckService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -57,7 +57,7 @@ trait VersionCheckController extends BackendController with HeaderValidator {
     journeyId:     JourneyId,
     service:       String
   )(implicit hc:   HeaderCarrier,
-    request:       Request[_]
+    request:       Request[?]
   ): Future[Result]
 }
 
@@ -75,7 +75,7 @@ class LiveVersionCheckController @Inject() (
     journeyId:      JourneyId,
     callingService: String
   )(implicit hc:    HeaderCarrier,
-    request:        Request[_]
+    request:        Request[?]
   ): Future[Result] =
     for {
       upgradeRequired <- service.versionCheck(deviceVersion, journeyId, callingService)
@@ -97,7 +97,7 @@ class SandboxVersionCheckController @Inject() (
     journeyId:      JourneyId,
     callingService: String
   )(implicit hc:    HeaderCarrier,
-    request:        Request[_]
+    request:        Request[?]
   ): Future[Result] = {
 
     val result: Result = (callingService, request.headers.get("SANDBOX-CONTROL")) match {
