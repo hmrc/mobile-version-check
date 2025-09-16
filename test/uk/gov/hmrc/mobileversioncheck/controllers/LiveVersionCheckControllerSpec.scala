@@ -23,7 +23,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.Android
-import uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes.JourneyId
+import uk.gov.hmrc.mobileversioncheck.domain.types.JourneyId
 import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
 import uk.gov.hmrc.mobileversioncheck.service.VersionCheckService
 

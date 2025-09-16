@@ -1,7 +1,7 @@
 # Add all the application routes to the app.routes file
-POST        /mobile-version-check                         @uk.gov.hmrc.mobileversioncheck.controllers.LiveVersionCheckController.versionCheck(journeyId: JourneyId, service: String="ngc")
-POST        /mobile-version-check/:service                @uk.gov.hmrc.mobileversioncheck.controllers.LiveVersionCheckController.versionCheck(journeyId: JourneyId, service: String)
-POST        /sandbox/mobile-version-check                 @uk.gov.hmrc.mobileversioncheck.controllers.SandboxVersionCheckController.versionCheck(journeyId: JourneyId, service: String)
-POST        /sandbox/mobile-version-check/:service        @uk.gov.hmrc.mobileversioncheck.controllers.SandboxVersionCheckController.versionCheck(journeyId: JourneyId, service: String)
+POST        /mobile-version-check                         @uk.gov.hmrc.mobileversioncheck.controllers.LiveVersionCheckController.versionCheck(journeyId: uk.gov.hmrc.mobileversioncheck.domain.types.JourneyId, service: String="ngc")
+POST        /mobile-version-check/:service                @uk.gov.hmrc.mobileversioncheck.controllers.LiveVersionCheckController.versionCheck(journeyId: uk.gov.hmrc.mobileversioncheck.domain.types.JourneyId, service: String)
+POST        /sandbox/mobile-version-check                 @uk.gov.hmrc.mobileversioncheck.controllers.SandboxVersionCheckController.versionCheck(journeyId: uk.gov.hmrc.mobileversioncheck.domain.types.JourneyId, service: String)
+POST        /sandbox/mobile-version-check/:service        @uk.gov.hmrc.mobileversioncheck.controllers.SandboxVersionCheckController.versionCheck(journeyId: uk.gov.hmrc.mobileversioncheck.domain.types.JourneyId, service: String)
 
 ->          /                                             health.Routes

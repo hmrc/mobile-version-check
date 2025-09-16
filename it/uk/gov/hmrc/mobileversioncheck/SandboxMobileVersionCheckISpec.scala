@@ -8,6 +8,7 @@ import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.{Android, iOS}
 import uk.gov.hmrc.mobileversioncheck.domain.DeviceVersion
 import uk.gov.hmrc.mobileversioncheck.support.BaseISpec
+import play.api.libs.ws.writeableOf_JsValue
 
 class SandboxMobileVersionCheckISpec extends BaseISpec {
   val mobileIdHeader: (String, String) = "X-MOBILE-USER-ID" -> "208606423740"
@@ -31,15 +32,15 @@ class SandboxMobileVersionCheckISpec extends BaseISpec {
               .post(toJson(DeviceVersion(iOS, "3.0.8")))
           )
 
-        response.status                                 shouldBe 200
-        (response.json \ "upgradeRequired").as[Boolean] shouldBe true
+        response.status.shouldBe(200)
+        (response.json \ "upgradeRequired").as[Boolean].shouldBe(true)
       }
 
       s"respect the sandbox headers and return false when no control is specified $testName" in {
         val response = await(request(callingService).post(toJson(DeviceVersion(iOS, "3.0.8"))))
 
-        response.status                                 shouldBe 200
-        (response.json \ "upgradeRequired").as[Boolean] shouldBe false
+        response.status.shouldBe(200)
+        (response.json \ "upgradeRequired").as[Boolean].shouldBe(false)
       }
 
       s"respect the sandbox headers and return a 500 error when the ERROR-500 control is specified $testName" in {
@@ -59,7 +60,7 @@ class SandboxMobileVersionCheckISpec extends BaseISpec {
             .post(toJson(DeviceVersion(Android, "3.0.8")))
         )
 
-        response.status shouldBe 400
+        response.status.shouldBe(400)
       }
 
       s"return 400 BAD REQUEST if journeyId is invalid$testName" in {
@@ -69,7 +70,7 @@ class SandboxMobileVersionCheckISpec extends BaseISpec {
             .post(toJson(DeviceVersion(Android, "3.0.8")))
         )
 
-        response.status shouldBe 400
+        response.status.shouldBe(400)
       }
     }
   }

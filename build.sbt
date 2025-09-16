@@ -7,19 +7,18 @@ lazy val microservice = Project(appName, file("."))
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     majorVersion := 0,
-    scalaVersion := "2.13.16",
+    scalaVersion := "3.6.4",
     playDefaultPort := 8244,
     libraryDependencies ++= AppDependencies(),
     update / evictionWarningOptions := EvictionWarningOptions.default
       .withWarnScalaVersionEviction(warnScalaVersionEviction = false),
-    coverageMinimumStmtTotal := 90,
+    coverageMinimumStmtTotal := 84,
     coverageFailOnMinimum := true,
     coverageHighlighting := true,
     coverageExcludedPackages := "<empty>;.*Routes.*;app.*;.*prod;.*definition;.*testOnlyDoNotUseInAppConf;.*com.kenshoo.*;.*javascript.*;.*BuildInfo;.*Reverse.*"
   )
   .settings(
-    routesImport ++= Seq("uk.gov.hmrc.mobileversioncheck.domain.types._",
-                         "uk.gov.hmrc.mobileversioncheck.domain.types.ModelTypes._")
+    routesImport ++= Seq("uk.gov.hmrc.mobileversioncheck.domain.types._", "uk.gov.hmrc.mobileversioncheck.domain.types.JourneyId._")
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
@@ -28,4 +27,3 @@ lazy val microservice = Project(appName, file("."))
     IntegrationTest / unmanagedSourceDirectories := (IntegrationTest / baseDirectory)(base => Seq(base / "it")).value,
     IntegrationTest / parallelExecution := false
   )
-

@@ -8,6 +8,7 @@ import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.mobileversioncheck.domain.NativeOS.{Android, iOS}
 import uk.gov.hmrc.mobileversioncheck.domain._
 import uk.gov.hmrc.mobileversioncheck.support.BaseISpec
+import play.api.libs.ws.writeableOf_JsValue
 
 class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
 
@@ -16,7 +17,7 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
 
     "respond with 200" in {
       val response = await(request.get())
-      response.status shouldBe 200
+      response.status.shouldBe(200)
     }
   }
 
@@ -39,7 +40,7 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
           .post(toJson(DeviceVersion(Android, alterDeviceVersion("3.0.7", 1))))
       )
 
-      response.status shouldBe 400
+      response.status.shouldBe(400)
     }
   }
 
@@ -65,8 +66,8 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
                 .post(toJson(DeviceVersion(iOS, alterDeviceVersion(lowestAcceptedIosVersion, -1))))
             )
 
-          response.status                                 shouldBe 200
-          (response.json \ "upgradeRequired").as[Boolean] shouldBe true
+          response.status.shouldBe(200)
+          (response.json \ "upgradeRequired").as[Boolean].shouldBe(true)
         }
 
         s"indicate that an upgrade is not required for a version equal to the lower bound version of iOS $testName" in {
@@ -76,8 +77,8 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
               .post(toJson(DeviceVersion(iOS, lowestAcceptedIosVersion)))
           )
 
-          response.status                                 shouldBe 200
-          (response.json \ "upgradeRequired").as[Boolean] shouldBe false
+          response.status.shouldBe(200)
+          (response.json \ "upgradeRequired").as[Boolean].shouldBe(false)
         }
 
         s"indicate that an upgrade is not required for a version above the lower bound version of iOS $testName" in {
@@ -88,8 +89,8 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
                 .post(toJson(DeviceVersion(iOS, alterDeviceVersion(lowestAcceptedIosVersion, 1))))
             )
 
-          response.status                                 shouldBe 200
-          (response.json \ "upgradeRequired").as[Boolean] shouldBe false
+          response.status.shouldBe(200)
+          (response.json \ "upgradeRequired").as[Boolean].shouldBe(false)
         }
 
         s"indicate that an upgrade is required for a version below the lower bound version of android $testName" in {
@@ -99,8 +100,8 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
               .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, -1))))
           )
 
-          response.status                                 shouldBe 200
-          (response.json \ "upgradeRequired").as[Boolean] shouldBe true
+          response.status.shouldBe(200)
+          (response.json \ "upgradeRequired").as[Boolean].shouldBe(true)
         }
 
         s"indicate that an upgrade is not required for a version equal to the lower bound version of android $testName" in {
@@ -110,8 +111,8 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
               .post(toJson(DeviceVersion(Android, lowestAcceptedAndroidVersion)))
           )
 
-          response.status                                 shouldBe 200
-          (response.json \ "upgradeRequired").as[Boolean] shouldBe false
+          response.status.shouldBe(200)
+          (response.json \ "upgradeRequired").as[Boolean].shouldBe(false)
         }
 
         s"indicate that an upgrade is not required for a version above the lower bound version of android $testName" in {
@@ -121,8 +122,8 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
               .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, 1))))
           )
 
-          response.status                                 shouldBe 200
-          (response.json \ "upgradeRequired").as[Boolean] shouldBe false
+          response.status.shouldBe(200)
+          (response.json \ "upgradeRequired").as[Boolean].shouldBe(false)
         }
 
         s"return 400 BAD REQUEST if journeyId is not supplied $testName" in {
@@ -132,7 +133,7 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
               .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, 1))))
           )
 
-          response.status shouldBe 400
+          response.status.shouldBe(400)
         }
 
         s"return 400 BAD REQUEST if journeyId is invalid$testName" in {
@@ -142,7 +143,7 @@ class LiveMobileVersionCheckStateActiveISpec extends BaseISpec {
               .post(toJson(DeviceVersion(Android, alterDeviceVersion(lowestAcceptedAndroidVersion, 1))))
           )
 
-          response.status shouldBe 400
+          response.status.shouldBe(400)
         }
       }
   }
