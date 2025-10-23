@@ -3,7 +3,7 @@ import sbt._
 
 object AppDependencies {
 
-  private val bootstrapPlayVersion = "9.14.0"
+  private val bootstrapPlayVersion = "10.3.0"
   private val playHmrcVersion      = "8.3.0"
   private val scalaMockVersion     = "7.5.0"
   private val refinedVersion       = "0.11.3"
